@@ -284,6 +284,8 @@
                     return;
                 }
                 
+                // 軽減率計算
+                // (1 - A) * (1 - B) * (1 - C) * (1 - 0.05 * L) * (1 - 0.025 * attr)
                 const leaderReduce = 1 - valA;
                 const friendReduce = 1 - valB;
                 const skillReduce = 1 - valC;
@@ -291,16 +293,27 @@
                 const attrReduce = 1 - 0.025 * valAttr;
 
                 let totalReduce = leaderReduce * friendReduce * skillReduce * lReduce * attrReduce;
-                totalReduce = Math.max(0, Math.min(1, totalReduce));
+                totalReduce = Math.max(0, Math.min(1, totalReduce)); // 0〜1に制限
                 const totalReducePercent = ((1 - totalReduce) * 100).toFixed(2);
                 totalReductionRateDisplay.textContent = `総軽減率: ${totalReducePercent}%`;
 
+
+                // ダメージ軽減後のダメージを表示
                 const damageRatios = damageDungeonData[selectedDungeon][selectedFloor];
+
                 damageRatios.forEach(ratio => {
+
+                    // ratio は元のダメージ割合（例：100%）
+                    // totalReduce は「残りダメージ倍率」なので、ratio * totalReduce が正しい
                     const finalDamagePercent = (ratio * totalReduce).toFixed(2);
                     const canSurvive = finalDamagePercent < 100 ? '耐えられる' : '耐えられない';
+
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${ratio}%</td><td>${finalDamagePercent}%</td><td class="${canSurvive === '耐えられる' ? 'can-withstand' : 'cannot-withstand'}">${canSurvive}</td>`;
+                    tr.innerHTML = `
+                        <td>${ratio}%</td>
+                        <td>${finalDamagePercent}%</td>
+                        <td class="${canSurvive === '耐えられる' ? 'can-withstand' : 'cannot-withstand'}">${canSurvive}</td>
+                        `;
                     resultsTableBody.appendChild(tr);
                 });
             }
@@ -440,39 +453,28 @@
 
                 fetchAndShowNotifications();
             }
-
-            // ▼【ここから修正】▼
-            /**
-             * 毎時0分に定時実行するようスケジュールを組む関数
-             */
+            
             function scheduleHourlyFetch() {
                 const now = new Date();
                 const nextHour = new Date(now);
-                // 次の時間の0分0秒に設定
                 nextHour.setHours(now.getHours() + 1, 0, 0, 0); 
                 
-                // 次の0分までの残り時間を計算
                 const delay = nextHour - now;
                 console.log(`次のお知らせ更新は ${nextHour.toLocaleTimeString('ja-JP')} です。（約${Math.round(delay / 60000)}分後)`);
 
-                // 次の0分になったら一度実行
                 setTimeout(() => {
                     console.log("定時更新: お知らせを取得します。");
                     fetchAndShowNotifications();
                     
-                    // その後は1時間ごとに繰り返し実行
                     setInterval(() => {
                         console.log("定時更新: お知らせを取得します。");
                         fetchAndShowNotifications();
-                    }, 3600000); // 1時間 = 3,600,000ミリ秒
+                    }, 3600000);
                 }, delay);
             }
 
-            // 初回実行
             initializeAll();
-            // 定時実行のスケジュールを開始
             scheduleHourlyFetch();
-            // ▲【ここまで修正】▲
 
             // ----------- 日付変更検知処理 -----------
             let currentDate = new Date().toDateString();
@@ -483,7 +485,7 @@
                     console.log("日付が変わりました。初期化処理を再実行します。");
                     initializeAll();
                 }
-            }, 60000); // 1分ごとにチェック
+            }, 60000);
 
         </script>
     </body>
