@@ -265,6 +265,14 @@
 
                 if (!selectedDungeon || !selectedFloor) {
                     totalReductionRateDisplay.textContent = '';
+                    if (selectedDungeon && selectedFloor && damageDungeonData[selectedDungeon]?.[selectedFloor]) {
+                        const damageRatios = damageDungeonData[selectedDungeon][selectedFloor];
+                        damageRatios.forEach(ratio => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `<td>${ratio}%</td><td>${ratio}%</td><td>-</td>`;
+                            resultsTableBody.appendChild(tr);
+                        });
+                    }
                     return;
                 }
 
@@ -383,10 +391,11 @@
             const popupOverlay = document.getElementById('popupOverlay');
             const popupCloseButton = document.getElementById('popupCloseButton');
             const notificationList = document.getElementById('notification-list');
+            const NOTIFICATION_API_URL = 'https://script.google.com/macros/s/AKfycbwUhiZj3lRBqxQO1hQjCfuvgXogRl19pDs7VkU9YZc8KP1DTRNeMnmCLiQ77STKm6nv/exec';
 
             async function fetchAndShowNotifications() {
                 try {
-                    const response = await fetch(NOTIFICATION_API_URL);
+                    const response = await fetch(NOTIFICATION_API_URL, { cache: 'no-cache' });
                     if (!response.ok) throw new Error('お知らせの取得に失敗');
                     const notifications = await response.json();
                     notificationList.innerHTML = '';
@@ -419,7 +428,6 @@
             
             // ----------- PWA通知機能関連 -----------
             const notificationButton = document.getElementById('notification-button');
-            const NOTIFICATION_API_URL = 'https://script.google.com/macros/s/AKfycbwUhiZj3lRBqxQO1hQjCfuvgXogRl19pDs7VkU9YZc8KP1DTRNeMnmCLiQ77STKm6nv/exec';
             const VAPID_PUBLIC_KEY = 'BPVk1fDkptNWfFY0Bm_bhithYhuGXo6QnkV9mnR1zFmmsSQgF3QSzTwEamNP9XDy13m4EdYKWGa6uE5nk8F4g6A';
 
             if ('serviceWorker' in navigator) {
