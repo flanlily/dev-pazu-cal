@@ -1,6 +1,6 @@
 {
   "name": "PDC非対応計算ツール",
-  "short_name": "軽減計算ver2.01",
+  "short_name": "軽減計算 dev.ver",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#2196f3",
