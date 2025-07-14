@@ -10,6 +10,13 @@ on:
 jobs:
   update-json:
     runs-on: ubuntu-latest
+    
+    # ===== ▼▼▼【これが最後の修正箇所です】▼▼▼ =====
+    permissions:
+      # リポジトリのコンテンツへの書き込み権限を付与
+      contents: write
+    # ===== ▲▲▲【ここまでが修正箇所です】▲▲▲
+
     steps:
       # 1. リポジトリのファイルをチェックアウト
       - name: Checkout repository
