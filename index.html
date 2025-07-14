@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="ja">
 
@@ -152,6 +150,7 @@
                     return {};
                 }
                 const data = await response.json();
+                // 割合ダメージの文字列を数値の配列に変換する
                 for (const dungeon in data) {
                     for (const floor in data[dungeon]) {
                         if (typeof data[dungeon][floor] === 'string') {
@@ -320,7 +319,7 @@
             const popupOverlay = document.getElementById('popupOverlay');
             const popupCloseButton = document.getElementById('popupCloseButton');
             const notificationList = document.getElementById('notification-list');
-            
+
             async function fetchAndShowNotifications() {
                 try {
                     const response = await fetch(`./announcements.json?t=${new Date().getTime()}`);
@@ -355,25 +354,30 @@
             popupCloseButton.addEventListener('click', () => popupCloseButton.parentElement.parentElement.classList.add('hidden'));
             
             // ----------- PWA と 初期化処理 -----------
-            // サービスワーカーの登録（オフライン対応のため）
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./sw.js')
                     .then(registration => console.log('Service Worker: 登録成功', registration))
                     .catch(error => console.error('Service Worker: 登録失敗', error));
             }
 
+            // ===== ▼▼▼【ここが修正箇所です】▼▼▼
             async function initializeAll() {
-                await Promise.all([
-                    fetchDamageDungeonData(),
-                    fetchExpData(),
-                    fetchAndShowNotifications()
-                ]);
+                // 最初にデータを取得し、グローバル変数にセットする
+                damageDungeonData = await fetchDamageDungeonData();
+                expData = await fetchExpData();
                 
+                // データが準備できたので、UIの初期化を行う
                 initializeDamageDungeonSelect();
                 initializeExpDungeonSelect();
+                
+                // 初期の計算を実行
                 runDamageCalculation();
                 calculateExp();
+                
+                // お知らせは並行して取得
+                fetchAndShowNotifications();
             }
+            // ===== ▲▲▲【ここまでが修正箇所です】▲▲▲
 
             initializeAll();
         </script>
