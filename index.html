@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="ja">
 
@@ -26,8 +28,6 @@
         </div>
         <div class="container">
             <h1>PDC非対応計算ツール</h1>
-
-            <button id="notification-button" style="margin-bottom: 15px; background: #5865f2; max-width: 400px; width: 100%;">プッシュ通知をオンにする</button>
 
             <div class="tabs">
                 <button class="tab-button active" data-tab="damage">割合計算</button>
@@ -214,77 +214,6 @@
                     });
                 });
             });
-
-            // ----------- ダメージ軽減処理 -----------
-            function initializeDamageDungeonSelect() {
-                dungeonSelect.innerHTML = '<option value="">ダンジョンを選択してください</option>';
-                for (const dungeonName in damageDungeonData) {
-                    const option = document.createElement('option');
-                    option.value = dungeonName;
-                    option.textContent = dungeonName;
-                    dungeonSelect.appendChild(option);
-                }
-                floorSelect.innerHTML = '<option value="">フロアを選択してください</option>';
-                floorSelect.disabled = true;
-            }
-
-            dungeonSelect.addEventListener('change', () => {
-                const selectedDungeon = dungeonSelect.value;
-                floorSelect.innerHTML = '<option value="">フロアを選択してください</option>';
-                floorSelect.disabled = true;
-
-                if (selectedDungeon && damageDungeonData[selectedDungeon]) {
-                    const floors = damageDungeonData[selectedDungeon];
-                    for (const floorName in floors) {
-                        const option = document.createElement('option');
-                        option.value = floorName;
-                        option.textContent = floorName;
-                        floorSelect.appendChild(option);
-                    }
-                    floorSelect.disabled = false;
-                }
-                runDamageCalculation();
-            });
-
-            floorSelect.addEventListener('change', runDamageCalculation);
-            [inputA, inputB, inputC, inputL, inputAttr].forEach(el => {
-                el.addEventListener('input', runDamageCalculation);
-                el.addEventListener('change', runDamageCalculation);
-            });
-
-            function runDamageCalculation() {
-                const selectedDungeon = dungeonSelect.value;
-                const selectedFloor = floorSelect.value;
-                const valA = parseFloat(inputA.value);
-                const valB = parseFloat(inputB.value);
-                const valC = parseFloat(inputC.value);
-                const valL = parseInt(inputL.value) || 0;
-                const valAttr = parseInt(inputAttr.value) || 0;
-
-                resultsTableBody.innerHTML = '';
-
-                if (!selectedDungeon || !selectedFloor) {
-                    totalReductionRateDisplay.textContent = '';
-                    if (selectedDungeon && selectedFloor && damageDungeonData[selectedDungeon]?.[selectedFloor]) {
-                        const damageRatios = damageDungeonData[selectedDungeon][selectedFloor];
-                        damageRatios.forEach(ratio => {
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `<td>${ratio}%</td><td>${ratio}%</td><td>-</td>`;
-                            resultsTableBody.appendChild(tr);
-                        });
-                    }
-                    return;
-                }
-
-                if (isNaN(valA) || isNaN(valB)) {
-                    totalReductionRateDisplay.textContent = 'リーダー軽減率と助っ人軽減率は数値で入力してください。';
-                    return;
-                }
-
-                if (valL < 0 || valAttr < 0) {
-                    totalReductionRateDisplay.textContent = '個数は0以上で入力してください。';
-                    return;
-                }
                 
                 // ===== ▼【今度こそ、ご指定の正しいロジックです】▼ =====
                 // 軽減率計算
@@ -391,28 +320,20 @@
             const popupOverlay = document.getElementById('popupOverlay');
             const popupCloseButton = document.getElementById('popupCloseButton');
             const notificationList = document.getElementById('notification-list');
-            const NOTIFICATION_API_URL = 'https://script.google.com/macros/s/AKfycbxMJN8ZCwcP226Zdqfm048PISh_Zv_n5qm5jc_2P_TdHb0wsZOHRJwxjYV-QmnD_B7k/exec';
-
-            function fetchAndShowNotifications() {
-                const oldScript = document.getElementById('jsonp-script');
-                if (oldScript) {
-                    oldScript.remove();
-                }
-                const script = document.createElement('script');
-                script.id = 'jsonp-script';
-                script.src = `${NOTIFICATION_API_URL}?callback=handleNotifications&t=${new Date().getTime()}`;
-                document.body.appendChild(script);
-            }
-
-            function handleNotifications(notifications) {
+            
+            async function fetchAndShowNotifications() {
                 try {
+                    const response = await fetch(`./announcements.json?t=${new Date().getTime()}`);
+                    if (!response.ok) throw new Error('お知らせファイルの読み込みに失敗');
+                    
+                    const notifications = await response.json();
                     notificationList.innerHTML = '';
+
                     if (notifications && notifications.length > 0) {
                         notifications.forEach(item => {
                             const div = document.createElement('div');
                             div.className = 'notification-item';
-                            const formattedContent = item.content.replace(/<t:(\d+):D>/g, (_, p1) => new Date(p1 * 1000).toLocaleDateString());
-                            div.innerHTML = `<p>${formattedContent.replace(/\n/g, '<br>')}</p>`;
+                            div.innerHTML = `<strong>${item.date}</strong><p>${item.content}</p>`;
                             notificationList.appendChild(div);
                         });
                         notificationBadge.textContent = notifications.length;
@@ -424,8 +345,8 @@
                         notificationIcon.classList.remove('active');
                     }
                 } catch (error) {
-                    console.error('お知らせの表示処理でエラー:', error);
-                    notificationList.innerHTML = '<p>お知らせの表示に失敗しました。</p>';
+                    console.error('お知らせ機能エラー:', error);
+                    notificationList.innerHTML = '<p>お知らせの読み込みに失敗しました。</p>';
                 }
             }
 
@@ -433,130 +354,28 @@
             popupOverlay.addEventListener('click', () => notificationPopup.classList.add('hidden'));
             popupCloseButton.addEventListener('click', () => popupCloseButton.parentElement.parentElement.classList.add('hidden'));
             
-            // ----------- PWA通知機能関連 -----------
-            const notificationButton = document.getElementById('notification-button');
-            const VAPID_PUBLIC_KEY = 'BPVk1fDkptNWfFY0Bm_bhithYhuGXo6QnkV9mnR1zFmmsSQgF3QSzTwEamNP9XDy13m4EdYKWGa6uE5nk8F4g6A';
-
+            // ----------- PWA と 初期化処理 -----------
+            // サービスワーカーの登録（オフライン対応のため）
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(registration => {
-                        console.log('Service Worker: 登録成功', registration);
-                        updateNotificationButton();
-                    })
-                    .catch(error => {
-                        console.error('Service Worker: 登録失敗', error);
-                        notificationButton.textContent = '通知機能は利用できません';
-                        notificationButton.disabled = true;
-                    });
+                    .then(registration => console.log('Service Worker: 登録成功', registration))
+                    .catch(error => console.error('Service Worker: 登録失敗', error));
             }
 
-            notificationButton.addEventListener('click', () => {
-                if (Notification.permission === 'denied') {
-                    alert('通知がブロックされています。ブラウザの設定から許可してください。');
-                    return;
-                }
-                handleSubscription();
-            });
-
-            function updateNotificationButton() {
-                navigator.serviceWorker.ready.then(registration => {
-                    registration.pushManager.getSubscription().then(subscription => {
-                        notificationButton.textContent = subscription ? 'プッシュ通知をオフにする' : 'プッシュ通知をオンにする';
-                    });
-                });
-            }
-
-            async function handleSubscription() {
-                const registration = await navigator.serviceWorker.ready;
-                const subscription = await registration.pushManager.getSubscription();
-                if (subscription) {
-                    await subscription.unsubscribe();
-                    console.log('通知をオフにしました');
-                } else {
-                    try {
-                        const newSubscription = await registration.pushManager.subscribe({
-                            userVisibleOnly: true,
-                            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-                        });
-                        await sendSubscriptionToServer(newSubscription);
-                        alert('プッシュ通知をオンにしました！');
-                    } catch (error) {
-                        console.error('購読に失敗しました: ', error);
-                        alert('通知の許可が得られませんでした。');
-                    }
-                }
-                updateNotificationButton();
-            }
-
-            // ===== ▼▼▼【ここが修正箇所です】▼▼▼
-            function sendSubscriptionToServer(subscription) {
-                const oldScript = document.getElementById('jsonp-sub-script');
-                if (oldScript) {
-                    oldScript.remove();
-                }
-                const script = document.createElement('script');
-                script.id = 'jsonp-sub-script';
-                const subData = encodeURIComponent(JSON.stringify(subscription));
-                script.src = `${NOTIFICATION_API_URL}?action=subscribe&data=${subData}&callback=handleSubscriptionResponse`;
-                document.body.appendChild(script);
-            }
-
-            function handleSubscriptionResponse(response) {
-                if (response && response.status === 'success') {
-                    console.log('サーバーへ購読情報を送信しました。');
-                } else {
-                    console.error('サーバーへの購読情報送信に失敗しました。', response);
-                }
-            }
-            // ===== ▲▲▲【ここまでが修正箇所です】▲▲▲
-            
-            function urlBase64ToUint8Array(base64String) {
-                const padding = '='.repeat((4 - base64String.length % 4) % 4);
-                const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-                const rawData = window.atob(base64);
-                const outputArray = new Uint8Array(rawData.length);
-                for (let i = 0; i < rawData.length; ++i) {
-                    outputArray[i] = rawData.charCodeAt(i);
-                }
-                return outputArray;
-            }
-
-            // ----------- 初期化と定期実行 -----------
             async function initializeAll() {
-                damageDungeonData = await fetchDamageDungeonData();
+                await Promise.all([
+                    fetchDamageDungeonData(),
+                    fetchExpData(),
+                    fetchAndShowNotifications()
+                ]);
+                
                 initializeDamageDungeonSelect();
-                expData = await fetchExpData();
                 initializeExpDungeonSelect();
                 runDamageCalculation();
                 calculateExp();
-                fetchAndShowNotifications();
-            }
-            
-            function scheduleHourlyFetch() {
-                const now = new Date();
-                const nextHour = new Date(now);
-                nextHour.setHours(now.getHours() + 1, 0, 0, 0); 
-                const delay = nextHour - now;
-                console.log(`次のお知らせ更新は ${nextHour.toLocaleTimeString('ja-JP')} です。`);
-                setTimeout(() => {
-                    fetchAndShowNotifications();
-                    setInterval(fetchAndShowNotifications, 3600000);
-                }, delay);
             }
 
             initializeAll();
-            scheduleHourlyFetch();
-
-            let currentDate = new Date().toDateString();
-            setInterval(() => {
-                const now = new Date().toDateString();
-                if (now !== currentDate) {
-                    currentDate = now;
-                    console.log("日付が変わりました。初期化処理を再実行します。");
-                    initializeAll();
-                }
-            }, 60000);
-
         </script>
     </body>
 </html>
