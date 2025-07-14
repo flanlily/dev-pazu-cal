@@ -407,7 +407,7 @@
                         });
                         notificationBadge.textContent = notifications.length;
                         notificationBadge.classList.remove('hidden');
-                        notificationIcon.classList.add('active');
+                        notificationIcon.classList.add('active'); // 新しいお知らせがあればアニメーション開始
                     } else {
                         notificationList.innerHTML = '<p>新しいお知らせはありません。</p>';
                         notificationBadge.classList.add('hidden');
@@ -422,8 +422,9 @@
             // ===== ▼▼▼【ここが修正箇所です】▼▼▼
             notificationIcon.addEventListener('click', () => {
                 notificationPopup.classList.remove('hidden');
-                // ポップアップを開いたらバッジを非表示にする
+                // ポップアップを開いたらバッジを非表示にし、アニメーションを停止する
                 notificationBadge.classList.add('hidden');
+                notificationIcon.classList.remove('active');
             });
             // ===== ▲▲▲【ここまでが修正箇所です】▲▲▲
 
