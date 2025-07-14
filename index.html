@@ -419,7 +419,14 @@
                 }
             }
 
-            notificationIcon.addEventListener('click', () => notificationPopup.classList.remove('hidden'));
+            // ===== ▼▼▼【ここが修正箇所です】▼▼▼
+            notificationIcon.addEventListener('click', () => {
+                notificationPopup.classList.remove('hidden');
+                // ポップアップを開いたらバッジを非表示にする
+                notificationBadge.classList.add('hidden');
+            });
+            // ===== ▲▲▲【ここまでが修正箇所です】▲▲▲
+
             popupOverlay.addEventListener('click', () => notificationPopup.classList.add('hidden'));
             popupCloseButton.addEventListener('click', () => popupCloseButton.parentElement.parentElement.classList.add('hidden'));
             
