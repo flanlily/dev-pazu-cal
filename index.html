@@ -286,6 +286,7 @@
                     return;
                 }
                 
+                // ===== ▼【ここがご指摘の修正箇所です】▼ =====
                 // 軽減率計算
                 // (1 - A) * (1 - B) * (1 - C) * (1 - 0.05 * L) * (1 - 0.025 * attr)
                 const leaderReduce = 1 - valA;
@@ -318,6 +319,7 @@
                         `;
                     resultsTableBody.appendChild(tr);
                 });
+                // ===== ▲【ここまでがご指摘の修正箇所です】▲ =====
             }
 
 
@@ -393,10 +395,7 @@
 
             async function fetchAndShowNotifications() {
                 try {
-                    // ===== ▼【ここが修正箇所です】▼ =====
                     const response = await fetch(NOTIFICATION_API_URL, { cache: 'no-cache' });
-                    // ===== ▲【ここまでが修正箇所です】▲ =====
-                    
                     if (!response.ok) throw new Error('お知らせの取得に失敗');
                     const notifications = await response.json();
                     notificationList.innerHTML = '';
@@ -486,7 +485,7 @@
                 const response = await fetch(NOTIFICATION_API_URL, {
                     method: 'POST',
                     body: JSON.stringify(subscription),
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'text/plain' },
                 });
                 if (!response.ok) throw new Error('サーバーへの購読情報送信に失敗');
                 console.log('サーバーへ購読情報を送信しました。');
