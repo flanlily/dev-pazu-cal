@@ -488,15 +488,27 @@
                 updateNotificationButton();
             }
 
-            async function sendSubscriptionToServer(subscription) {
-                const response = await fetch(NOTIFICATION_API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(subscription),
-                    headers: { 'Content-Type': 'text/plain' },
-                });
-                if (!response.ok) throw new Error('サーバーへの購読情報送信に失敗');
-                console.log('サーバーへ購読情報を送信しました。');
+            // ===== ▼▼▼【ここが修正箇所です】▼▼▼
+            function sendSubscriptionToServer(subscription) {
+                const oldScript = document.getElementById('jsonp-sub-script');
+                if (oldScript) {
+                    oldScript.remove();
+                }
+                const script = document.createElement('script');
+                script.id = 'jsonp-sub-script';
+                const subData = encodeURIComponent(JSON.stringify(subscription));
+                script.src = `${NOTIFICATION_API_URL}?action=subscribe&data=${subData}&callback=handleSubscriptionResponse`;
+                document.body.appendChild(script);
             }
+
+            function handleSubscriptionResponse(response) {
+                if (response && response.status === 'success') {
+                    console.log('サーバーへ購読情報を送信しました。');
+                } else {
+                    console.error('サーバーへの購読情報送信に失敗しました。', response);
+                }
+            }
+            // ===== ▲▲▲【ここまでが修正箇所です】▲▲▲
             
             function urlBase64ToUint8Array(base64String) {
                 const padding = '='.repeat((4 - base64String.length % 4) % 4);
