@@ -21,15 +21,26 @@ jobs:
         with:
           python-version: '3.10'
 
-      # ▼▼▼【ここが修正箇所です】▼▼▼
       - name: Install dependencies
-        run: pip install requests python-dotenv
-      # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        run: pip install requests
 
       - name: Run update script
         run: python ./.github/workflows/update_script.py
         env:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-          GH_PAT: ${{ secrets.GH_PAT }}
-          GITHUB_USER: ${{ github.repository_owner }}
-          GITHUB_REPO: ${{ github.event.repository.name }}
+          # GH_PATはもう不要
+          # GITHUB_USERとGITHUB_REPOも不要
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          # 両方のファイルをaddする
+          git add announcements.json .github/workflows/last_message_id.txt
+          # ファイルに変更があった場合のみコミット
+          if ! git diff --staged --quiet; then
+            git commit -m "[Bot] Update announcements"
+            git push
+          else
+            echo "No changes to commit."
+          fi
