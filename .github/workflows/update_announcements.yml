@@ -1,46 +1,74 @@
-name: Update Announcements
+name: Update and Deploy Site
 
 on:
+  # 15分ごとに実行
   schedule:
-    # 15分ごとに実行
     - cron: '*/15 * * * *'
+  # 手動でも実行できるようにする
   workflow_dispatch:
+  # mainブランチに直接変更があった場合もサイトを更新する
+  push:
+    branches:
+      - main
+
+# ワークフロー全体の権限を設定
+permissions:
+  contents: write   # リポジトリへの書き込み権限（ファイル更新のため）
+  pages: write      # GitHub Pagesへのデプロイ権限
+  id-token: write   # デプロイ時の認証用
+
+# 同じワークフローの重複実行を防ぐ
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  update-json:
+  # サイトをビルドするジョブ
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
+      # 1. リポジトリのファイルをチェックアウト
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2. Python環境をセットアップ
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
+      # 3. 必要なライブラリをインストール
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests python-dotenv
 
+      # 4. お知らせ更新スクリプトを実行
       - name: Run update script
         run: python ./.github/workflows/update_script.py
         env:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-          # GH_PATはもう不要
-          # GITHUB_USERとGITHUB_REPOも不要
 
-      - name: Commit and push if changed
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          # 両方のファイルをaddする
-          git add announcements.json .github/workflows/last_message_id.txt
-          # ファイルに変更があった場合のみコミット
-          if ! git diff --staged --quiet; then
-            git commit -m "[Bot] Update announcements"
-            git push
-          else
-            echo "No changes to commit."
-          fi
+      # 5. サイトの公開設定
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      # 6. 公開用のファイル一式をアーティファクトとしてアップロード
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # リポジトリのルートディレクトリ全体をアップロード
+          path: '.'
+
+  # サイトをデプロイするジョブ
+  deploy:
+    # buildジョブが完了した後に実行
+    needs: build
+    
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
