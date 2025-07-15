@@ -2,30 +2,30 @@ name: Update Announcements
 
 on:
   schedule:
-    # 15分ごとに実行（cron式）
+    # 15分ごとに実行
     - cron: '*/15 * * * *'
-  # 手動でも実行できるようにする
   workflow_dispatch:
 
 jobs:
   update-json:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
-      # 1. リポジトリのファイルをチェックアウト
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Python環境のセットアップ
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      # 3. Pythonのライブラリをインストール
+      # ▼▼▼【ここが修正箇所です】▼▼▼
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests python-dotenv
+      # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
-      # 4. JSON更新スクリプトの実行
       - name: Run update script
         run: python ./.github/workflows/update_script.py
         env:
@@ -33,13 +33,3 @@ jobs:
           GH_PAT: ${{ secrets.GH_PAT }}
           GITHUB_USER: ${{ github.repository_owner }}
           GITHUB_REPO: ${{ github.event.repository.name }}
-
-      # 5. 更新があればコミットしてプッシュ
-      - name: Commit and push if changed
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add announcements.json
-          # ファイルに変更があった場合のみコミット
-          git diff --staged --quiet || git commit -m "[Bot] Update announcements.json"
-          git push
