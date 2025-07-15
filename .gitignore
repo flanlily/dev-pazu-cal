@@ -1,0 +1,8 @@
+# .gitignore
+
+# .envファイルは絶対にGitの管理に含めない
+.env
+
+# Pythonのキャッシュファイルなども除外
+__pycache__/
+*.pyc
