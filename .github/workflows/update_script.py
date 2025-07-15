@@ -2,87 +2,104 @@ import os
 import requests
 import json
 from datetime import datetime
+import base64
+from dotenv import load_dotenv # ◀◀◀ この行を追加
 
-# 環境変数から秘密情報を取得
+# .envファイルが存在すれば、その中の変数を環境変数として読み込む
+load_dotenv() # ◀◀◀ この行を追加
+
+# 環境変数から秘密情報を取得（この後のコードは変更なし）
 DISCORD_BOT_TOKEN = os.environ['DISCORD_BOT_TOKEN']
 GITHUB_TOKEN = os.environ['GH_PAT']
 GITHUB_USER = os.environ['GITHUB_USER']
 GITHUB_REPO = os.environ['GITHUB_REPO']
 
 # 監視するDiscordチャンネルID
-ANNOUNCEMENT_CHANNEL_ID = "1393963700569767968" # ここはあなたのIDに書き換えてください
+# .envファイルに記述があればそちらを優先、なければ直接記述されたものを使う
+ANNOUNCEMENT_CHANNEL_ID = os.getenv('ANNOUNCEMENT_CHANNEL_ID', "1393963700569767968")
 
-# 最後に処理したメッセージIDを保存するファイル
-LAST_ID_FILE = '.github/workflows/last_message_id.txt'
-ANNOUNCEMENTS_FILE = 'announcements.json'
+# ファイルのパス
+ANNOUNCEMENTS_FILE_PATH = 'announcements.json'
+LAST_ID_FILE_PATH = '.github/workflows/last_message_id.txt'
 
 def get_latest_discord_message():
     """Discordから最新のメッセージを1件取得する"""
     url = f"https://discord.com/api/v10/channels/{ANNOUNCEMENT_CHANNEL_ID}/messages?limit=1"
     headers = {'Authorization': f'Bot {DISCORD_BOT_TOKEN}'}
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    return response.json()[0]
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        messages = response.json()
+        return messages[0] if messages else None
+    except requests.exceptions.RequestException as e:
+        print(f"Discordへのリクエストでエラー: {e}")
+        return None
 
-def get_file_from_github(path):
-    """GitHubからファイルを取得する"""
-    url = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/contents/{path}"
-    headers = {'Authorization': f'token {GITHUB_TOKEN}', 'Accept': 'application/vnd.github.v3.raw'}
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    return response.json()
-
-def update_file_on_github(path, content, sha):
-    """GitHubのファイルを更新する"""
+def get_github_file(path):
+    """GitHubからファイルを取得する (SHAを含む)"""
     url = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/contents/{path}"
     headers = {'Authorization': f'token {GITHUB_TOKEN}', 'Accept': 'application/vnd.github.v3+json'}
-    # Base64エンコードはGitHub Actionsのコミットステップで行うため、ここでは不要
-    # Pythonスクリプト内で直接コミットする場合はエンコードが必要
-    # ここではファイルに書き出すだけ
-    with open(path, 'w', encoding='utf-8') as f:
-        json.dump(content, f, ensure_ascii=False, indent=2)
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 404:
+            return None, None # ファイルが存在しない
+        response.raise_for_status()
+        data = response.json()
+        content = base64.b64decode(data['content']).decode('utf-8')
+        return content, data['sha']
+    except requests.exceptions.RequestException as e:
+        print(f"GitHubからのファイル取得でエラー ({path}): {e}")
+        return None, None
 
+def update_github_file(path, content_string, sha, commit_message):
+    """GitHubのファイルを更新または新規作成する"""
+    url = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/contents/{path}"
+    headers = {
+        'Authorization': f'token {GITHUB_TOKEN}',
+        'Accept': 'application/vnd.github.v3+json'
+    }
+    encoded_content = base64.b64encode(content_string.encode('utf-8')).decode('utf-8')
+    data = {
+        "message": commit_message,
+        "content": encoded_content
+    }
+    if sha:
+        data["sha"] = sha
+    
+    response = requests.put(url, headers=headers, json=data)
+    response.raise_for_status()
+    print(f"GitHubのファイルを更新/作成しました: {path}")
 
-# メイン処理
+# --- メイン処理 ---
 try:
     print("処理開始...")
     latest_message = get_latest_discord_message()
+    if not latest_message:
+        print("Discordからメッセージを取得できませんでした。処理を終了します。")
+        exit()
+    
     print(f"最新メッセージ取得: {latest_message['id']}")
 
-    last_processed_id = ""
-    if os.path.exists(LAST_ID_FILE):
-        with open(LAST_ID_FILE, 'r') as f:
-            last_processed_id = f.read().strip()
-    print(f"前回処理ID: {last_processed_id or 'なし'}")
+    last_processed_id, last_id_sha = get_github_file(LAST_ID_FILE_PATH)
+    print(f"前回処理ID: {last_processed_id.strip() if last_processed_id else 'なし'}")
 
-    if latest_message['id'] != last_processed_id:
+    if not last_processed_id or latest_message['id'] != last_processed_id.strip():
         print("新しいメッセージを検知。ファイルを更新します。")
 
-        # 現在のannouncements.jsonを取得
-        try:
-            announcements = get_file_from_github(ANNOUNCEMENTS_FILE)
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 404:
-                print("announcements.jsonが見つからないため、新規作成します。")
-                announcements = []
-            else:
-                raise e
+        announcements_content, announcements_sha = get_github_file(ANNOUNCEMENTS_FILE_PATH)
+        announcements = json.loads(announcements_content) if announcements_content else []
 
-        # 新しいお知らせを作成して先頭に追加
         timestamp = datetime.fromisoformat(latest_message['timestamp'])
         new_entry = {
             "date": timestamp.strftime('%Y/%m/%d'),
             "content": latest_message['content'].replace('\n', '<br>')
         }
         announcements.insert(0, new_entry)
+        
+        updated_announcements_string = json.dumps(announcements, ensure_ascii=False, indent=2)
+        update_github_file(ANNOUNCEMENTS_FILE_PATH, updated_announcements_string, announcements_sha, f"[Bot] Update announcements.json")
 
-        # 更新した内容をファイルに書き出す（コミットはYAML側で行う）
-        with open(ANNOUNCEMENTS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(announcements, f, ensure_ascii=False, indent=2)
-
-        # 処理したIDをファイルに保存
-        with open(LAST_ID_FILE, 'w') as f:
-            f.write(latest_message['id'])
+        update_github_file(LAST_ID_FILE_PATH, latest_message['id'], last_id_sha, f"[Bot] Update last message ID")
 
         print(f"ファイル更新完了: {new_entry['content']}")
     else:
@@ -90,3 +107,4 @@ try:
 
 except Exception as e:
     print(f"エラーが発生しました: {e}")
+    exit(1)
