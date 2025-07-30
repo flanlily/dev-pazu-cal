@@ -68,10 +68,6 @@
                     <label for="inputL">回復L字消し個数 (1個5%軽減)</label>
                     <input id="inputL" min="0" step="1" type="number" value="0" />
                 </div>
-                <div class="input-group">
-                    <label for="inputAttr">属性軽減+個数 (1個2.5%軽減)</label>
-                    <input id="inputAttr" min="0" step="1" type="number" value="0" />
-                </div>
                 <div id="results">
                     <h2>計算結果</h2>
                     <p id="totalReductionRate"></p>
@@ -180,7 +176,6 @@
             const inputB = document.getElementById('inputB');
             const inputC = document.getElementById('inputC');
             const inputL = document.getElementById('inputL');
-            const inputAttr = document.getElementById('inputAttr');
             const totalReductionRateDisplay = document.getElementById('totalReductionRate');
             const resultsTableBody = document.querySelector('#resultsTable tbody');
 
@@ -245,7 +240,7 @@
             });
 
             floorSelect.addEventListener('change', runDamageCalculation);
-            [inputA, inputB, inputC, inputL, inputAttr].forEach(el => {
+            [inputA, inputB, inputC, inputL].forEach(el => {
                 el.addEventListener('input', runDamageCalculation);
                 el.addEventListener('change', runDamageCalculation);
             });
@@ -257,7 +252,6 @@
                 const valB = parseFloat(inputB.value);
                 const valC = parseFloat(inputC.value);
                 const valL = parseInt(inputL.value) || 0;
-                const valAttr = parseInt(inputAttr.value) || 0;
 
                 resultsTableBody.innerHTML = '';
 
@@ -279,7 +273,7 @@
                     return;
                 }
 
-                if (valL < 0 || valAttr < 0) {
+                if (valL < 0) {
                     totalReductionRateDisplay.textContent = '個数は0以上で入力してください。';
                     return;
                 }
@@ -291,7 +285,6 @@
                 const friendReduce = 1 - valB;
                 const skillReduce = 1 - valC;
                 const lReduce = 1 - 0.05 * valL;
-                const attrReduce = 1 - 0.025 * valAttr;
 
                 let totalReduce = leaderReduce * friendReduce * skillReduce * lReduce * attrReduce;
                 totalReduce = Math.max(0, Math.min(1, totalReduce)); // 0〜1に制限
@@ -389,6 +382,8 @@
             const popupOverlay = document.getElementById('popupOverlay');
             const popupCloseButton = document.getElementById('popupCloseButton');
             const notificationList = document.getElementById('notification-list');
+            
+            let latestNotificationDate = ''; // 最新のお知らせの日付を保持する変数
 
             async function fetchAndShowNotifications() {
                 try {
@@ -399,15 +394,35 @@
                     notificationList.innerHTML = '';
 
                     if (notifications && notifications.length > 0) {
+                        // お知らせが日付順にソートされていると仮定し、最新の日付を取得
+                        latestNotificationDate = notifications[0].date;
+                        
+                        // ブラウザから最後に読んだお知らせの日付を取得
+                        const lastReadDate = localStorage.getItem('lastReadNotificationDate');
+                        let unreadCount = 0;
+
                         notifications.forEach(item => {
                             const div = document.createElement('div');
                             div.className = 'notification-item';
                             div.innerHTML = `<strong>${item.date}</strong><p>${item.content}</p>`;
                             notificationList.appendChild(div);
+
+                            // 未読かどうかをチェック
+                            if (!lastReadDate || item.date > lastReadDate) {
+                                unreadCount++;
+                            }
                         });
-                        notificationBadge.textContent = notifications.length;
-                        notificationBadge.classList.remove('hidden');
-                        notificationIcon.classList.add('active'); // 新しいお知らせがあればアニメーション開始
+
+                        // 未読件数に応じてバッジを更新
+                        if (unreadCount > 0) {
+                            notificationBadge.textContent = unreadCount;
+                            notificationBadge.classList.remove('hidden');
+                            notificationIcon.classList.add('active');
+                        } else {
+                            notificationBadge.classList.add('hidden');
+                            notificationIcon.classList.remove('active');
+                        }
+
                     } else {
                         notificationList.innerHTML = '<p>新しいお知らせはありません。</p>';
                         notificationBadge.classList.add('hidden');
@@ -419,14 +434,16 @@
                 }
             }
 
-            // ===== ▼▼▼【ここが修正箇所です】▼▼▼
             notificationIcon.addEventListener('click', () => {
                 notificationPopup.classList.remove('hidden');
-                // ポップアップを開いたらバッジを非表示にし、アニメーションを停止する
-                notificationBadge.classList.add('hidden');
-                notificationIcon.classList.remove('active');
+                notificationBadge.classList.add('hidden'); // バッジを非表示に
+                notificationIcon.classList.remove('active'); // アニメーションを停止
+
+                // ポップアップを開いた時点で、最新のお知らせを「既読」として記録
+                if (latestNotificationDate) {
+                    localStorage.setItem('lastReadNotificationDate', latestNotificationDate);
+                }
             });
-            // ===== ▲▲▲【ここまでが修正箇所です】▲▲▲
 
             popupOverlay.addEventListener('click', () => notificationPopup.classList.add('hidden'));
             popupCloseButton.addEventListener('click', () => popupCloseButton.parentElement.parentElement.classList.add('hidden'));
