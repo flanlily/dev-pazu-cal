@@ -280,13 +280,13 @@
                 
                 // ===== ▼▼▼【今度こそ、ご指定の正しいロジックです】▼▼▼
                 // 軽減率計算
-                // (1 - A) * (1 - B) * (1 - C) * (1 - 0.05 * L) * (1 - 0.025 * attr)
+                // (1 - A) * (1 - B) * (1 - C) * (1 - 0.05 * L)
                 const leaderReduce = 1 - valA;
                 const friendReduce = 1 - valB;
                 const skillReduce = 1 - valC;
                 const lReduce = 1 - 0.05 * valL;
 
-                let totalReduce = leaderReduce * friendReduce * skillReduce * lReduce * attrReduce;
+                let totalReduce = leaderReduce * friendReduce * skillReduce * lReduce;
                 totalReduce = Math.max(0, Math.min(1, totalReduce)); // 0〜1に制限
                 const totalReducePercent = ((1 - totalReduce) * 100).toFixed(2);
                 totalReductionRateDisplay.textContent = `総軽減率: ${totalReducePercent}%`;
