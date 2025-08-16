@@ -3,7 +3,6 @@ import discord
 from discord.ext import tasks
 import json
 import os
-import asyncio
 from datetime import datetime, timezone
 
 ANNOUNCEMENTS_FILE = 'announcements.json'
@@ -52,15 +51,14 @@ async def on_ready():
 async def check_channel_messages():
     print('Checking channel messages...')
     channel = client.get_channel(CHANNEL_ID)
+    print(f'Channel: {channel}')
     if channel is None:
         print(f'Channel ID {CHANNEL_ID} not found.')
         return
     last_checked = load_last_checked()
-    after = last_checked if last_checked else datetime.now(timezone.utc)
-    # 直近12時間分を取得
+    after = last_checked if last_checked else None  # 初回は全件取得
     messages = []
     async for msg in channel.history(limit=100, after=after):
-        # Bot自身の投稿は除外
         if msg.author == client.user:
             continue
         messages.append(msg)
@@ -68,11 +66,9 @@ async def check_channel_messages():
         print('新しいメッセージはありません。')
         save_last_checked(datetime.now(timezone.utc))
         return
-    # 古い順に
     messages = sorted(messages, key=lambda m: m.created_at)
     data = load_announcements()
     for msg in messages:
-        # dateはYYYY/MM/DD形式、contentは本文のみ
         data.append({
             "date": msg.created_at.strftime('%Y/%m/%d'),
             "content": msg.content
