@@ -1,4 +1,3 @@
-
 import discord
 from discord.ext import tasks
 import json
@@ -44,38 +43,49 @@ def save_announcements(data):
 
 @client.event
 async def on_ready():
+    print('on_ready called')
     print(f'Logged in as {client.user}')
-    check_channel_messages.start()
+    try:
+        check_channel_messages.start()
+        print('check_channel_messages started')
+    except Exception as e:
+        print(f'Error starting check_channel_messages: {e}')
 
 @tasks.loop(hours=12)
 async def check_channel_messages():
     print('Checking channel messages...')
-    channel = client.get_channel(CHANNEL_ID)
-    print(f'Channel: {channel}')
-    if channel is None:
-        print(f'Channel ID {CHANNEL_ID} not found.')
-        return
-    last_checked = load_last_checked()
-    after = last_checked if last_checked else None  # 初回は全件取得
-    messages = []
-    async for msg in channel.history(limit=100, after=after):
-        if msg.author == client.user:
-            continue
-        messages.append(msg)
-    if not messages:
-        print('新しいメッセージはありません。')
+    try:
+        channel = client.get_channel(CHANNEL_ID)
+        print(f'Channel: {channel}')
+        if channel is None:
+            print(f'Channel ID {CHANNEL_ID} not found.')
+            return
+        last_checked = load_last_checked()
+        print(f'last_checked: {last_checked}')
+        after = last_checked if last_checked else None  # 初回は全件取得
+        print(f'after: {after}')
+        messages = []
+        async for msg in channel.history(limit=100, after=after):
+            if msg.author == client.user:
+                continue
+            messages.append(msg)
+        print(f'取得メッセージ数: {len(messages)}')
+        if not messages:
+            print('新しいメッセージはありません。')
+            save_last_checked(datetime.now(timezone.utc))
+            return
+        messages = sorted(messages, key=lambda m: m.created_at)
+        data = load_announcements()
+        for msg in messages:
+            data.append({
+                "date": msg.created_at.strftime('%Y/%m/%d'),
+                "content": msg.content
+            })
+        save_announcements(data)
+        print(f'{len(messages)}件のお知らせを追加しました。')
         save_last_checked(datetime.now(timezone.utc))
-        return
-    messages = sorted(messages, key=lambda m: m.created_at)
-    data = load_announcements()
-    for msg in messages:
-        data.append({
-            "date": msg.created_at.strftime('%Y/%m/%d'),
-            "content": msg.content
-        })
-    save_announcements(data)
-    print(f'{len(messages)}件のお知らせを追加しました。')
-    save_last_checked(datetime.now(timezone.utc))
+    except Exception as e:
+        print(f'Error in check_channel_messages: {e}')
 
 if __name__ == '__main__':
     import sys
