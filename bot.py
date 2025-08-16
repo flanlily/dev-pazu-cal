@@ -2,7 +2,9 @@ import discord
 from discord.ext import tasks
 import json
 import os
-from datetime import datetime, timezone
+import subprocess
+import datetime
+from datetime import timezone
 
 ANNOUNCEMENTS_FILE = 'announcements.json'
 LAST_CHECK_FILE = 'last_checked.txt'
@@ -48,8 +50,21 @@ async def on_ready():
     try:
         check_channel_messages.start()
         print('check_channel_messages started')
+        daily_git_pull.start()
+        print('daily_git_pull started')
     except Exception as e:
-        print(f'Error starting check_channel_messages: {e}')
+        print(f'Error starting tasks: {e}')
+@tasks.loop(minutes=1)
+async def daily_git_pull():
+    now = datetime.datetime.now()
+    if now.hour == 0 and now.minute == 0:
+        print('git pull実行')
+        try:
+            result = subprocess.run(['git', 'pull', 'origin', 'main'], capture_output=True, text=True)
+            print(result.stdout)
+            print(result.stderr)
+        except Exception as e:
+            print(f'git pull失敗: {e}')
 
 @tasks.loop(hours=12)
 async def check_channel_messages():
