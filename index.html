@@ -597,6 +597,11 @@
                 syncButton.addEventListener('click', async () => {
                     syncButton.disabled = true;
                     syncButton.textContent = '同期中...';
+                    // 現在のタブ情報を保存
+                    const activeTab = document.querySelector('.tab-button.active');
+                    if (activeTab) {
+                        localStorage.setItem('lastActiveTab', activeTab.dataset.tab);
+                    }
                     // クッキー全削除
                     document.cookie.split(';').forEach(function(c) {
                         document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
@@ -623,6 +628,15 @@
                     // 強制リロード
                     location.reload(true);
                 });
+            // リロード後に前回のタブを復元
+            window.addEventListener('DOMContentLoaded', () => {
+                const lastActiveTab = localStorage.getItem('lastActiveTab');
+                if (lastActiveTab) {
+                    const tabBtn = document.querySelector(`.tab-button[data-tab="${lastActiveTab}"]`);
+                    if (tabBtn) tabBtn.click();
+                    localStorage.removeItem('lastActiveTab');
+                }
+            });
             }
                 try {
                     const response = await fetch(`./announcements.json?t=${new Date().getTime()}`);
