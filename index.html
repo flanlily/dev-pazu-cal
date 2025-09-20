@@ -597,20 +597,31 @@
                 syncButton.addEventListener('click', async () => {
                     syncButton.disabled = true;
                     syncButton.textContent = '同期中...';
-                    try {
-                        await initializeAll();
-                        syncButton.textContent = '最新データに更新しました';
-                        setTimeout(() => {
-                            syncButton.textContent = 'データ同期';
-                            syncButton.disabled = false;
-                        }, 1500);
-                    } catch (e) {
-                        syncButton.textContent = '同期失敗';
-                        setTimeout(() => {
-                            syncButton.textContent = 'データ同期';
-                            syncButton.disabled = false;
-                        }, 2000);
+                    // クッキー全削除
+                    document.cookie.split(';').forEach(function(c) {
+                        document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
+                    });
+                    // ServiceWorkerキャッシュもクリア
+                    if ('caches' in window) {
+                        const cacheNames = await caches.keys();
+                        for (const name of cacheNames) {
+                            await caches.delete(name);
+                        }
                     }
+                    // ファイルキャッシュバスター付きで再取得
+                    const bust = '?t=' + new Date().getTime();
+                    const files = [
+                        'index.html',
+                        'dungeonData.json',
+                        'pad_experience_data.json',
+                        'style.css',
+                        'announcements.json'
+                    ];
+                    try {
+                        await Promise.all(files.map(f => fetch(f + bust, {cache: 'reload'})));
+                    } catch (e) {}
+                    // 強制リロード
+                    location.reload(true);
                 });
             }
                 try {
