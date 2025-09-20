@@ -49,6 +49,7 @@
                             <input type="number" min="0" id="hp5" placeholder="5体目 HP">
                             <input type="number" min="0" id="hp6" placeholder="6体目 HP">
                         </div>
+                        <input type="hidden" id="actualTotalHp" value="0">
                         <div class="hp-result" id="totalHpResult">-</div>
                     </div>
                 </div>
@@ -295,13 +296,16 @@
                 // 1. パーティ合計HP計算
                 const hpInputs = [1,2,3,4,5,6].map(i => document.getElementById('hp'+i));
                 const totalHpResult = document.getElementById('totalHpResult');
+                const actualTotalHp = document.getElementById('actualTotalHp');
                 function calcTotalHp() {
                     const hps = hpInputs.map(input => parseInt(input.value) || 0);
                     const total = hps.reduce((a,b) => a+b, 0);
                     totalHpResult.textContent = total > 0 ? `合計HP: ${total.toLocaleString()}` : '-';
                     // 合計HPを他の計算にも使えるようにセット
                     document.getElementById('teamTotalHp').value = total;
-                    document.getElementById('actualTotalHp').value = total;
+                    actualTotalHp.value = total;
+                    // 合計HPが変わったら実質HP計算も即時反映
+                    actualTotalHp.dispatchEvent(new Event('input'));
                 }
                 hpInputs.forEach(input => input.addEventListener('input', calcTotalHp));
                 // 初期化時も一度計算
@@ -323,10 +327,7 @@
 
                 // 3. 実質HP計算
                 // L
-                const actualTotalHp = document.createElement('input');
-                actualTotalHp.type = 'hidden';
-                actualTotalHp.id = 'actualTotalHp';
-                document.body.appendChild(actualTotalHp);
+                // actualTotalHpはHTML上に配置済み
                 const actualLHpMulti = document.getElementById('actualLHpMulti');
                 const actualLReduce = document.getElementById('actualLReduce');
                 const actualLHpResult = document.getElementById('actualLHpResult');
