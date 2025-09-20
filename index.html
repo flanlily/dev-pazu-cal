@@ -49,7 +49,6 @@
                             <input type="number" min="0" id="hp5" placeholder="5体目 HP">
                             <input type="number" min="0" id="hp6" placeholder="6体目 HP">
                         </div>
-                        <input type="hidden" id="actualTotalHp" value="0">
                         <div class="hp-result" id="totalHpResult">-</div>
                     </div>
                 </div>
@@ -83,6 +82,7 @@
                         <label>軽減スキル（0〜1）</label>
                         <input type="number" min="0" max="1" step="0.01" id="actualSkillReduce" placeholder="例: 0.75 (75%軽減)">
                         <div class="hp-result" id="actualHpResult">-</div>
+                        <div class="hp-result" id="actualHpRateResult">-</div>
                     </div>
                 </div>
                 <div class="hp-section">
@@ -296,19 +296,12 @@
                 // 1. パーティ合計HP計算
                 const hpInputs = [1,2,3,4,5,6].map(i => document.getElementById('hp'+i));
                 const totalHpResult = document.getElementById('totalHpResult');
-                const actualTotalHp = document.getElementById('actualTotalHp');
                 function calcTotalHp() {
                     const hps = hpInputs.map(input => parseInt(input.value) || 0);
                     const total = hps.reduce((a,b) => a+b, 0);
                     totalHpResult.textContent = total > 0 ? `合計HP: ${total.toLocaleString()}` : '-';
-                    // 合計HPを他の計算にも使えるようにセット
-                    document.getElementById('teamTotalHp').value = total;
-                    actualTotalHp.value = total;
-                    // 合計HPが変わったら実質HP計算も即時反映
-                    actualTotalHp.dispatchEvent(new Event('input'));
                 }
                 hpInputs.forEach(input => input.addEventListener('input', calcTotalHp));
-                // 初期化時も一度計算
                 calcTotalHp();
 
                 // 2. チームHP覚醒で盛れているHP
@@ -326,21 +319,19 @@
                 calcTeamHpAwake();
 
                 // 3. 実質HP計算
-                // L
-                // actualTotalHpはHTML上に配置済み
+                // 3. 実質HP計算
                 const actualLHpMulti = document.getElementById('actualLHpMulti');
                 const actualLReduce = document.getElementById('actualLReduce');
                 const actualLHpResult = document.getElementById('actualLHpResult');
                 function calcLActualHp() {
-                    const totalHp = parseInt(document.getElementById('actualTotalHp').value) || 0;
                     const lMulti = parseFloat(actualLHpMulti.value) || 1;
                     const lReduce = parseFloat(actualLReduce.value) || 0;
                     if(lReduce >= 1) {
                         actualLHpResult.textContent = '軽減率は1未満で入力してください';
                         return;
                     }
-                    const lActual = totalHp * lMulti / (1 - lReduce);
-                    actualLHpResult.textContent = totalHp > 0 ? `A実質HP: ${Math.round(lActual).toLocaleString()}（倍率×1/(1-軽減率)）` : '-';
+                    const lRate = lMulti / (1 - lReduce);
+                    actualLHpResult.textContent = lMulti > 0 ? `A実質HP倍率: ${lRate.toFixed(2)}（倍率×1/(1-軽減率)）` : '-';
                 }
                 actualLHpMulti.addEventListener('input', calcLActualHp);
                 actualLReduce.addEventListener('input', calcLActualHp);
@@ -349,23 +340,22 @@
                 const actualFReduce = document.getElementById('actualFReduce');
                 const actualFHpResult = document.getElementById('actualFHpResult');
                 function calcFActualHp() {
-                    const totalHp = parseInt(document.getElementById('actualTotalHp').value) || 0;
                     const fMulti = parseFloat(actualFHpMulti.value) || 1;
                     const fReduce = parseFloat(actualFReduce.value) || 0;
                     if(fReduce >= 1) {
                         actualFHpResult.textContent = '軽減率は1未満で入力してください';
                         return;
                     }
-                    const fActual = totalHp * fMulti / (1 - fReduce);
-                    actualFHpResult.textContent = totalHp > 0 ? `B実質HP: ${Math.round(fActual).toLocaleString()}（倍率×1/(1-軽減率)）` : '-';
+                    const fRate = fMulti / (1 - fReduce);
+                    actualFHpResult.textContent = fMulti > 0 ? `B実質HP倍率: ${fRate.toFixed(2)}（倍率×1/(1-軽減率)）` : '-';
                 }
                 actualFHpMulti.addEventListener('input', calcFActualHp);
                 actualFReduce.addEventListener('input', calcFActualHp);
                 // 全体
                 const actualSkillReduce = document.getElementById('actualSkillReduce');
                 const actualHpResult = document.getElementById('actualHpResult');
-                function calcTotalActualHp() {
-                    const totalHp = parseInt(document.getElementById('actualTotalHp').value) || 0;
+                const actualHpRateResult = document.getElementById('actualHpRateResult');
+                function calcTotalActualHpRate() {
                     const lMulti = parseFloat(actualLHpMulti.value) || 1;
                     const lReduce = parseFloat(actualLReduce.value) || 0;
                     const fMulti = parseFloat(actualFHpMulti.value) || 1;
@@ -373,32 +363,29 @@
                     const skillReduce = parseFloat(actualSkillReduce.value) || 0;
                     if(lReduce >= 1 || fReduce >= 1 || skillReduce >= 1) {
                         actualHpResult.textContent = '軽減率は1未満で入力してください';
+                        actualHpRateResult.textContent = '-';
                         return;
                     }
                     const totalReduce = (1-lReduce)*(1-fReduce)*(1-skillReduce);
                     if(totalReduce <= 0) {
                         actualHpResult.textContent = '軽減率の合計が100%を超えています';
+                        actualHpRateResult.textContent = '-';
                         return;
                     }
                     const avgMulti = (lMulti + fMulti) / 2;
-                    const actual = totalHp * avgMulti / totalReduce;
-                    actualHpResult.textContent = totalHp > 0 ? `全体実質HP: ${Math.round(actual).toLocaleString()}（倍率×1/総合残りダメ倍率）` : '-';
+                    const rate = avgMulti / totalReduce;
+                    actualHpResult.textContent = '';
+                    actualHpRateResult.textContent = `全体実質HP倍率: ${rate.toFixed(2)}（倍率×1/総合残りダメ倍率）`;
                 }
-                actualLHpMulti.addEventListener('input', calcTotalActualHp);
-                actualLReduce.addEventListener('input', calcTotalActualHp);
-                actualFHpMulti.addEventListener('input', calcTotalActualHp);
-                actualFReduce.addEventListener('input', calcTotalActualHp);
-                actualSkillReduce.addEventListener('input', calcTotalActualHp);
-                // 合計HPが変わった時も再計算
-                actualTotalHp.addEventListener('input', () => {
-                    calcLActualHp();
-                    calcFActualHp();
-                    calcTotalActualHp();
-                });
+                actualLHpMulti.addEventListener('input', calcTotalActualHpRate);
+                actualLReduce.addEventListener('input', calcTotalActualHpRate);
+                actualFHpMulti.addEventListener('input', calcTotalActualHpRate);
+                actualFReduce.addEventListener('input', calcTotalActualHpRate);
+                actualSkillReduce.addEventListener('input', calcTotalActualHpRate);
                 // 初期化時も一度計算
                 calcLActualHp();
                 calcFActualHp();
-                calcTotalActualHp();
+                calcTotalActualHpRate();
 
                 // 4. チームHP覚醒個数逆算
                 const targetHp = document.getElementById('targetHp');
