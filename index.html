@@ -11,7 +11,12 @@
     </head>
 
     <body>
-        <div class="notification-icon" id="notificationIcon">
+        <div class="notification-sync-bar">
+            <div class="notification-icon" id="notificationIcon">
+                <span class="notification-badge hidden" id="notificationBadge"></span>
+            </div>
+            <button id="syncButton">🔄 データ同期</button>
+        </div>
             <span class="notification-badge hidden" id="notificationBadge"></span>
         </div>
 
@@ -30,6 +35,61 @@
             <div class="tabs">
                 <button class="tab-button active" data-tab="damage">割合計算</button>
                 <button class="tab-button" data-tab="exp">経験値計算</button>
+                <button class="tab-button" data-tab="hp">HP計算</button>
+            </div>
+
+            <div class="tab-content hidden" id="hp">
+                <div class="hp-section">
+                    <h3>1. パーティ合計HP計算</h3>
+                    <div class="input-group hp-party-inputs">
+                        <label>各キャラのHPを入力（6体分）</label>
+                        <div>
+                            <input type="number" min="0" id="hp1" placeholder="1体目 HP">
+                            <input type="number" min="0" id="hp2" placeholder="2体目 HP">
+                            <input type="number" min="0" id="hp3" placeholder="3体目 HP">
+                            <input type="number" min="0" id="hp4" placeholder="4体目 HP">
+                            <input type="number" min="0" id="hp5" placeholder="5体目 HP">
+                            <input type="number" min="0" id="hp6" placeholder="6体目 HP">
+                        </div>
+                        <button id="calcTotalHpBtn">合計HP計算</button>
+                        <div class="hp-result" id="totalHpResult">-</div>
+                    </div>
+                </div>
+                <div class="hp-section">
+                    <h3>2. チームHP覚醒で盛れているHP</h3>
+                    <div class="input-group">
+                        <label>合計HP</label>
+                        <input type="number" min="0" id="teamTotalHp" placeholder="合計HP">
+                        <label>チームHP覚醒の個数</label>
+                        <input type="number" min="0" id="teamHpAwakeCount" placeholder="チームHP覚醒個数">
+                        <button id="calcTeamHpAwakeBtn">チームHP覚醒で増えたHP計算</button>
+                        <div class="hp-result" id="teamHpAwakeResult">-</div>
+                    </div>
+                </div>
+                <div class="hp-section">
+                    <h3>3. 実質HP計算</h3>
+                    <div class="input-group">
+                        <label>合計HP</label>
+                        <input type="number" min="0" id="actualTotalHp" placeholder="合計HP">
+                        <label>リーダーHP倍率</label>
+                        <input type="number" min="0" step="0.01" id="leaderHpMulti" placeholder="例: 2.6">
+                        <label>軽減率（0〜1）</label>
+                        <input type="number" min="0" max="1" step="0.01" id="reduceRate" placeholder="例: 0.5 (50%軽減)">
+                        <button id="calcActualHpBtn">実質HP計算</button>
+                        <div class="hp-result" id="actualHpResult">-</div>
+                    </div>
+                </div>
+                <div class="hp-section">
+                    <h3>4. チームHP覚醒個数逆算</h3>
+                    <div class="input-group">
+                        <label>目標HP</label>
+                        <input type="number" min="0" id="targetHp" placeholder="目標HP">
+                        <label>現状HP</label>
+                        <input type="number" min="0" id="currentHp" placeholder="現状HP">
+                        <button id="calcNeededAwakeBtn">必要なチームHP覚醒個数計算</button>
+                        <div class="hp-result" id="neededAwakeResult">-</div>
+                    </div>
+                </div>
             </div>
             <div class="tab-content" id="damage">
                 <div class="input-group">
@@ -201,11 +261,82 @@
             let expData = {};
 
             // ----------- タブ切り替え処理 -----------
+
+            // タブごとに初期化関数を用意
+            let damageTabInitialized = false;
+            let expTabInitialized = false;
+            let hpTabInitialized = false;
+
+            function setupDamageTab() {
+                if (damageTabInitialized) return;
+                floorSelect.addEventListener('change', runDamageCalculation);
+                [inputA, inputB, inputC, inputL].forEach(el => {
+                    el.addEventListener('input', runDamageCalculation);
+                    el.addEventListener('change', runDamageCalculation);
+                });
+                damageTabInitialized = true;
+            }
+
+            function setupExpTab() {
+                if (expTabInitialized) return;
+                expFloor.addEventListener('change', calculateExp);
+                leaderMultiplier.addEventListener('change', calculateExp);
+                friendMultiplier.addEventListener('change', calculateExp);
+                dungeonBonusCount.addEventListener('input', calculateExp);
+                expTabInitialized = true;
+            }
+
+            function setupHpTab() {
+                if (hpTabInitialized) return;
+                document.getElementById('calcTotalHpBtn').addEventListener('click', () => {
+                    const hps = [1,2,3,4,5,6].map(i => parseInt(document.getElementById('hp'+i).value) || 0);
+                    const total = hps.reduce((a,b) => a+b, 0);
+                    document.getElementById('totalHpResult').textContent = `合計HP: ${total.toLocaleString()}`;
+                });
+                document.getElementById('calcTeamHpAwakeBtn').addEventListener('click', () => {
+                    const totalHp = parseInt(document.getElementById('teamTotalHp').value) || 0;
+                    const count = parseInt(document.getElementById('teamHpAwakeCount').value) || 0;
+                    const plus = Math.floor(totalHp / (1 + 0.05 * count) * 0.05 * count);
+                    document.getElementById('teamHpAwakeResult').textContent = `チームHP覚醒で増えたHP: ${plus.toLocaleString()}`;
+                });
+                document.getElementById('calcActualHpBtn').addEventListener('click', () => {
+                    const totalHp = parseInt(document.getElementById('actualTotalHp').value) || 0;
+                    const multi = parseFloat(document.getElementById('leaderHpMulti').value) || 1;
+                    const reduce = parseFloat(document.getElementById('reduceRate').value) || 0;
+                    if(reduce >= 1) {
+                        document.getElementById('actualHpResult').textContent = '軽減率は1未満で入力してください';
+                        return;
+                    }
+                    const actual = totalHp * multi / (1 - reduce);
+                    document.getElementById('actualHpResult').textContent = `実質HP: ${Math.round(actual).toLocaleString()}（倍率×1/(1-軽減率)）`;
+                });
+                document.getElementById('calcNeededAwakeBtn').addEventListener('click', () => {
+                    const target = parseInt(document.getElementById('targetHp').value) || 0;
+                    const current = parseInt(document.getElementById('currentHp').value) || 0;
+                    if(current <= 0) {
+                        document.getElementById('neededAwakeResult').textContent = '現状HPを正しく入力してください';
+                        return;
+                    }
+                    let n = 0;
+                    let hp = current;
+                    while(hp < target && n < 99) {
+                        n++;
+                        hp = Math.floor(current * (1 + 0.05 * n));
+                    }
+                    if(hp < target) {
+                        document.getElementById('neededAwakeResult').textContent = '99個でも到達できません';
+                    } else {
+                        document.getElementById('neededAwakeResult').textContent = `あと${n}個必要です（合計HP: ${hp.toLocaleString()}）`;
+                    }
+                });
+                hpTabInitialized = true;
+            }
+
+            // タブ切り替え時に該当タブの初期化関数を呼ぶ
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     tabs.forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
-
                     tabContents.forEach(tc => {
                         if (tc.id === tab.dataset.tab) {
                             tc.classList.remove('hidden');
@@ -213,8 +344,26 @@
                             tc.classList.add('hidden');
                         }
                     });
+                    if(tab.dataset.tab === 'damage') setupDamageTab();
+                    if(tab.dataset.tab === 'exp') setupExpTab();
+                    if(tab.dataset.tab === 'hp') setupHpTab();
                 });
             });
+
+            // 初期表示時にdamageタブだけでなく、activeなタブの初期化も行う
+            const activeTab = document.querySelector('.tab-button.active');
+            if (activeTab) {
+                if(activeTab.dataset.tab === 'damage') setupDamageTab();
+                if(activeTab.dataset.tab === 'exp') setupExpTab();
+                if(activeTab.dataset.tab === 'hp') setupHpTab();
+                tabContents.forEach(tc => {
+                    if (tc.id === activeTab.dataset.tab) {
+                        tc.classList.remove('hidden');
+                    } else {
+                        tc.classList.add('hidden');
+                    }
+                });
+            }
 
             // ----------- ダメージ軽減処理 -----------
             function initializeDamageDungeonSelect() {
@@ -394,6 +543,28 @@
             let latestNotificationDate = ''; // 最新のお知らせの日付を保持する変数
 
             async function fetchAndShowNotifications() {
+            // データ同期ボタン
+            const syncButton = document.getElementById('syncButton');
+            if (syncButton) {
+                syncButton.addEventListener('click', async () => {
+                    syncButton.disabled = true;
+                    syncButton.textContent = '同期中...';
+                    try {
+                        await initializeAll();
+                        syncButton.textContent = '最新データに更新しました';
+                        setTimeout(() => {
+                            syncButton.textContent = 'データ同期';
+                            syncButton.disabled = false;
+                        }, 1500);
+                    } catch (e) {
+                        syncButton.textContent = '同期失敗';
+                        setTimeout(() => {
+                            syncButton.textContent = 'データ同期';
+                            syncButton.disabled = false;
+                        }, 2000);
+                    }
+                });
+            }
                 try {
                     const response = await fetch(`./announcements.json?t=${new Date().getTime()}`);
                     if (!response.ok) throw new Error('お知らせファイルの読み込みに失敗');
