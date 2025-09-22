@@ -1,6 +1,6 @@
 {
   "name": "PDC非対応計算ツール",
-  "short_name": "軽減計算 dev.ver",
+  "short_name": "Not-PDC Calculater tool",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#2196f3",
@@ -12,8 +12,8 @@
       "type": "image/png"
     },
     {
-      "src": "20250923.png",
-      "sizes": "4947x4947",
+      "src": "20250923-1.png",
+      "sizes": "1649x1649",
       "type": "image/png"
     }
   ]
