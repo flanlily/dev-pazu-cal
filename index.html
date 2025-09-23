@@ -668,6 +668,12 @@
                     }
                     // lastReadNotificationDateは退避
                     const lastReadNotificationDate = localStorage.getItem('lastReadNotificationDate');
+                    // 旧データ件数を保存
+                    let oldCount = 0;
+                    try {
+                        const oldData = JSON.parse(localStorage.getItem('dungeonDataCache') || '{}');
+                        oldCount = Object.keys(oldData).reduce((sum, k) => sum + Object.keys(oldData[k]||{}).length, 0);
+                    } catch(e) {}
                     // クッキー全削除
                     document.cookie.split(';').forEach(function(c) {
                         document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
@@ -695,9 +701,42 @@
                     if (lastReadNotificationDate) {
                         localStorage.setItem('lastReadNotificationDate', lastReadNotificationDate);
                     }
+                    // 新データ件数を取得
+                    let newCount = 0;
+                    try {
+                        const res = await fetch('dungeonData.json?t=' + new Date().getTime());
+                        const newData = await res.json();
+                        newCount = Object.keys(newData).reduce((sum, k) => sum + Object.keys(newData[k]||{}).length, 0);
+                        localStorage.setItem('dungeonDataCache', JSON.stringify(newData));
+                    } catch(e) {}
+                    // 件数差分を通知
+                    if (newCount > oldCount) {
+                        showSyncNotification(`${newCount-oldCount}件の新しいデータを同期しました`);
+                    }
                     // 強制リロード
                     location.reload(true);
                 });
+                // 同期通知バー
+                function showSyncNotification(msg) {
+                    let bar = document.getElementById('sync-notification-bar');
+                    if (!bar) {
+                        bar = document.createElement('div');
+                        bar.id = 'sync-notification-bar';
+                        bar.style.position = 'fixed';
+                        bar.style.top = '0';
+                        bar.style.left = '0';
+                        bar.style.width = '100%';
+                        bar.style.background = '#1976d2';
+                        bar.style.color = '#fff';
+                        bar.style.textAlign = 'center';
+                        bar.style.zIndex = '9999';
+                        bar.style.padding = '8px 0';
+                        document.body.appendChild(bar);
+                    }
+                    bar.textContent = msg;
+                    bar.style.display = 'block';
+                    setTimeout(()=>{ bar.style.display = 'none'; }, 4000);
+                }
             // リロード後に前回のタブを復元
             window.addEventListener('DOMContentLoaded', () => {
                 const lastActiveTab = localStorage.getItem('lastActiveTab');
