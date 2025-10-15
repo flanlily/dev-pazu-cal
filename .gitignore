@@ -6,3 +6,4 @@
 # Pythonのキャッシュファイルなども除外
 __pycache__/
 *.pyc
+node_modules
