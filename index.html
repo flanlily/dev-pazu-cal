@@ -39,8 +39,15 @@
             </div>
 
             <div class="tab-content hidden" id="hp">
+                <div class="hp-toc" style="margin-bottom:16px;">
+                    <strong>HP計算目次：</strong>
+                    <a href="#hp-section-1" style="margin-right:8px;">1. パーティ合計HP</a>
+                    <a href="#hp-section-2" style="margin-right:8px;">2. チームHP覚醒</a>
+                    <a href="#hp-section-3" style="margin-right:8px;">3. 実質HP計算</a>
+                    <a href="#hp-section-4">4. チームHP覚醒逆算</a>
+                </div>
                 <div class="hp-section">
-                    <h3>1. パーティ合計HP計算</h3>
+                    <h3 id="hp-section-1">1. パーティ合計HP計算</h3>
                     <div class="input-group hp-party-inputs">
                         <label>各キャラのHPを入力（6体分）</label>
                         <div>
@@ -61,7 +68,7 @@
                     </div>
                 </div>
                 <div class="hp-section">
-                    <h3>2. チームHP覚醒で盛れているHP</h3>
+                    <h3 id="hp-section-2">2. チームHP覚醒で盛れているHP</h3>
                     <div class="input-group">
                         <label>合計HP</label>
                         <input type="number" min="0" id="teamTotalHp" placeholder="合計HP">
@@ -71,7 +78,7 @@
                     </div>
                 </div>
                 <div class="hp-section">
-                    <h3>3. 実質HP計算</h3>
+                    <h3 id="hp-section-3">3. 実質HP計算</h3>
                     <div class="input-group">
                         <strong>L（リーダー）</strong><br>
                         <label>HP倍率</label>
@@ -94,7 +101,7 @@
                     </div>
                 </div>
                 <div class="hp-section">
-                    <h3>4. チームHP覚醒個数逆算</h3>
+                    <h3 id="hp-section-4">4. チームHP覚醒個数逆算</h3>
                     <div class="input-group">
                         <label>目標HP</label>
                         <input type="number" min="0" id="targetHp" placeholder="目標HP">
@@ -211,6 +218,13 @@
                     <input id="dungeonBonusCount" min="0" step="1" type="number" value="0" />
                     <small>1つにつき2%加算され、累乗されます</small>
                 </div>
+                <div class="input-group">
+                    <label for="adDouble">広告視聴2倍</label>
+                    <select id="adDouble">
+                        <option value="1">なし</option>
+                        <option value="2">2倍</option>
+                    </select>
+                </div>
                 <div id="expResult">
                     <h2>経験値結果</h2>
                     <p id="expValue">-</p>
@@ -296,6 +310,7 @@
                 leaderMultiplier.addEventListener('change', calculateExp);
                 friendMultiplier.addEventListener('change', calculateExp);
                 dungeonBonusCount.addEventListener('input', calculateExp);
+                document.getElementById('adDouble').addEventListener('change', calculateExp);
                 expTabInitialized = true;
             }
 
@@ -640,7 +655,8 @@
                 const friendMulti = parseFloat(friendMultiplier.value);
                 const bonusCount = parseInt(dungeonBonusCount.value) || 0;
                 const bonusMultiplier = Math.pow(1.02, bonusCount);
-                const totalExp = baseExp * leaderMulti * friendMulti * bonusMultiplier;
+                const adDouble = parseFloat(document.getElementById('adDouble').value) || 1;
+                const totalExp = baseExp * leaderMulti * friendMulti * bonusMultiplier * adDouble;
                 expValueDisplay.textContent = `獲得経験値: ${Math.round(totalExp).toLocaleString()}`;
             }
 
@@ -735,7 +751,7 @@
                     }
                     bar.textContent = msg;
                     bar.style.display = 'block';
-                    setTimeout(()=>{ bar.style.display = 'none'; }, 4000);
+                    setTimeout(()=>{ bar.style.display = 'none'; }, 6000);
                 }
             // リロード後に前回のタブを復元
             window.addEventListener('DOMContentLoaded', () => {
