@@ -64,7 +64,7 @@ body {
     max-width: 95vw;
     width: 100%;
     margin: 0 auto;
-    background: rgba(30, 60, 120, 0.92);
+        background: rgba(227, 242, 253, 0.7); /* 薄い青色+透過 */
     padding: 18px 8px 28px 8px;
     border-radius: 16px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.18);
