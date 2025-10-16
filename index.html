@@ -14,7 +14,6 @@
         <title>PDC非対応計算ツール</title>
         <link href="./manifest.json" rel="manifest" />
         <meta content="#0078d7" name="theme-color" />
-        <!-- スプラッシュ画像 -->
         <link rel="apple-touch-startup-image" href="20250922.png" />
     </head>
 
@@ -342,22 +341,23 @@
                 const leaderReduce3 = document.getElementById('leaderReduce3');
                 const leaderLCount = document.getElementById('leaderLCount');
                 const leaderActualHpResult = document.getElementById('leaderActualHpResult');
-            function calcLeaderActualHp() {
-                const hpMulti = parseFloat(leaderHpMulti.value) || 1;
-                const reduce1 = parseFloat(leaderReduce1.value) || 0;
-                const reduce2 = parseFloat(leaderReduce2.value) || 0;
-                const reduce3 = parseFloat(leaderReduce3.value) || 0;
-                const lCount = parseInt(leaderLCount.value) || 0;
+
+                function calcLeaderActualHp() {
+                    const hpMulti = parseFloat(leaderHpMulti.value) || 1;
+                    const reduce1 = parseFloat(leaderReduce1.value) || 0;
+                    const reduce2 = parseFloat(leaderReduce2.value) || 0;
+                    const reduce3 = parseFloat(leaderReduce3.value) || 0;
+                    const lCount = parseInt(leaderLCount.value) || 0;
                     if (reduce1 >= 1 || reduce2 >= 1 || reduce3 >= 1) {
                         leaderActualHpResult.textContent = '軽減率は1未満で入力してください';
                         return;
                     }
-                const ljiReduce = 1 - 0.05 * lCount;
+                    const ljiReduce = 1 - 0.05 * lCount;
                     if (ljiReduce <= 0) {
                         leaderActualHpResult.textContent = 'L字軽減数が多すぎます';
                         return;
                     }
-                const actualRate = hpMulti / (1 - reduce1) / (1 - reduce2) / (1 - reduce3) / ljiReduce;
+                    const actualRate = hpMulti / (1 - reduce1) / (1 - reduce2) / (1 - reduce3) / ljiReduce;
                     leaderActualHpResult.textContent = `実質HP${actualRate.toFixed(2)}倍`;
                 }
                 [leaderHpMulti, leaderReduce1, leaderReduce2, leaderReduce3, leaderLCount].forEach(el => {
@@ -366,29 +366,30 @@
                 calcLeaderActualHp();
                 // ...existing code...
                 // 1. パーティ合計HP計算
-                const hpInputs = [1,2,3,4,5,6].map(i => document.getElementById('hp'+i));
+                const hpInputs = [1, 2, 3, 4, 5, 6].map(i => document.getElementById('hp' + i));
                 const totalHpResult = document.getElementById('totalHpResult');
                 const partyLHpMulti = document.getElementById('partyLHpMulti');
                 const partyFHpMulti = document.getElementById('partyFHpMulti');
                 const partyTeamHpAwakeCount = document.getElementById('partyTeamHpAwakeCount');
-            function calcTotalHp() {
-                const hps = hpInputs.map(input => parseInt(input.value) || 0);
-                const total = hps.reduce((a,b) => a+b, 0);
-                const lMulti = parseFloat(partyLHpMulti.value) || 1;
-                const fMulti = parseFloat(partyFHpMulti.value) || 1;
-                const teamHpAwake = parseInt(partyTeamHpAwakeCount.value) || 0;
-                // チームHP覚醒倍率
-                const teamHpAwakeMulti = 1 + 0.05 * teamHpAwake;
-                // L/F平均倍率
-                const avgMulti = (lMulti + fMulti) / 2;
-                // 計算
-                let resultText = '-';
-                if (total > 0) {
-                    const afterMulti = Math.floor(total * avgMulti);
-                    const afterAwake = Math.floor(afterMulti * teamHpAwakeMulti);
-                    resultText = `合計HP: ${total.toLocaleString()} → L/F倍率後: ${afterMulti.toLocaleString()} → チームHP覚醒後: ${afterAwake.toLocaleString()}`;
-                }
-                totalHpResult.textContent = resultText;
+
+                function calcTotalHp() {
+                    const hps = hpInputs.map(input => parseInt(input.value) || 0);
+                    const total = hps.reduce((a, b) => a + b, 0);
+                    const lMulti = parseFloat(partyLHpMulti.value) || 1;
+                    const fMulti = parseFloat(partyFHpMulti.value) || 1;
+                    const teamHpAwake = parseInt(partyTeamHpAwakeCount.value) || 0;
+                    // チームHP覚醒倍率
+                    const teamHpAwakeMulti = 1 + 0.05 * teamHpAwake;
+                    // L/F平均倍率
+                    const avgMulti = (lMulti + fMulti) / 2;
+                    // 計算
+                    let resultText = '-';
+                    if (total > 0) {
+                        const afterMulti = Math.floor(total * avgMulti);
+                        const afterAwake = Math.floor(afterMulti * teamHpAwakeMulti);
+                        resultText = `合計HP: ${total.toLocaleString()} → L/F倍率後: ${afterMulti.toLocaleString()} → チームHP覚醒後: ${afterAwake.toLocaleString()}`;
+                    }
+                    totalHpResult.textContent = resultText;
                 }
                 hpInputs.forEach(input => input.addEventListener('input', calcTotalHp));
                 partyLHpMulti.addEventListener('input', calcTotalHp);
@@ -396,6 +397,8 @@
                 partyTeamHpAwakeCount.addEventListener('input', calcTotalHp);
                 calcTotalHp();
                 // ...existing code...
+                hpTabInitialized = true;
+            } // <<<【修正点】不足していた閉じ括弧 `}` をここに追加しました
 
             // タブ切り替え時に該当タブの初期化関数を呼ぶ
             tabs.forEach(tab => {
@@ -409,18 +412,18 @@
                             tc.classList.add('hidden');
                         }
                     });
-                    if(tab.dataset.tab === 'damage') setupDamageTab();
-                    if(tab.dataset.tab === 'exp') setupExpTab();
-                    if(tab.dataset.tab === 'hp') setupHpTab();
+                    if (tab.dataset.tab === 'damage') setupDamageTab();
+                    if (tab.dataset.tab === 'exp') setupExpTab();
+                    if (tab.dataset.tab === 'hp') setupHpTab();
                 });
             });
 
             // 初期表示時にdamageタブだけでなく、activeなタブの初期化も行う
-                const activeTab = document.querySelector('.tab-button.active');
-                if (activeTab) {
-                if(activeTab.dataset.tab === 'damage') setupDamageTab();
-                if(activeTab.dataset.tab === 'exp') setupExpTab();
-                if(activeTab.dataset.tab === 'hp') setupHpTab();
+            const activeTab = document.querySelector('.tab-button.active');
+            if (activeTab) {
+                if (activeTab.dataset.tab === 'damage') setupDamageTab();
+                if (activeTab.dataset.tab === 'exp') setupExpTab();
+                if (activeTab.dataset.tab === 'hp') setupHpTab();
                 tabContents.forEach(tc => {
                     if (tc.id === activeTab.dataset.tab) {
                         tc.classList.remove('hidden');
@@ -479,7 +482,7 @@
 
                 if (!selectedDungeon || !selectedFloor) {
                     totalReductionRateDisplay.textContent = '';
-                    if (selectedDungeon && selectedFloor && damageDungeonData[selectedDungeon]?.[selectedFloor]) {
+                    if (selectedDungeon && selectedFloor && damageDungeonData[selectedDungeon] ? .[selectedFloor]) {
                         const damageRatios = damageDungeonData[selectedDungeon][selectedFloor];
                         damageRatios.forEach(ratio => {
                             const tr = document.createElement('tr');
@@ -499,7 +502,7 @@
                     totalReductionRateDisplay.textContent = '個数は0以上で入力してください。';
                     return;
                 }
-                
+
                 // ===== ▼▼▼【今度こそ、ご指定の正しいロジックです】▼▼▼
                 // 軽減率計算
                 // (1 - A) * (1 - B) * (1 - C) * (1 - 0.05 * L)
@@ -579,16 +582,25 @@
             function calculateExp() {
                 const dungeonName = expDungeon.value;
                 const floorName = expFloor.value;
-                if (!dungeonName) { expValueDisplay.textContent = '-'; return; }
+                if (!dungeonName) {
+                    expValueDisplay.textContent = '-';
+                    return;
+                }
                 const floors = expData[dungeonName];
                 let baseExp;
                 if (typeof floors === 'object' && !Array.isArray(floors)) {
-                    if (!floorName) { expValueDisplay.textContent = '-'; return; }
+                    if (!floorName) {
+                        expValueDisplay.textContent = '-';
+                        return;
+                    }
                     baseExp = floors[floorName];
                 } else {
                     baseExp = floors;
                 }
-                if (typeof baseExp === 'undefined') { expValueDisplay.textContent = '-'; return; }
+                if (typeof baseExp === 'undefined') {
+                    expValueDisplay.textContent = '-';
+                    return;
+                }
                 const leaderMulti = parseFloat(leaderMultiplier.value);
                 const friendMulti = parseFloat(friendMultiplier.value);
                 const bonusCount = parseInt(dungeonBonusCount.value) || 0;
@@ -613,113 +625,117 @@
             const popupOverlay = document.getElementById('popupOverlay');
             const popupCloseButton = document.getElementById('popupCloseButton');
             const notificationList = document.getElementById('notification-list');
-            
+
             let latestNotificationDate = ''; // 最新のお知らせの日付を保持する変数
 
             async function fetchAndShowNotifications() {
-            // データ同期ボタン
-            const syncButton = document.getElementById('syncButton');
-            if (syncButton) {
-                syncButton.addEventListener('click', async () => {
-                    syncButton.disabled = true;
-                    syncButton.textContent = '同期中...';
-                    // 現在のタブ情報を保存
-                    const activeTab = document.querySelector('.tab-button.active');
-                    if (activeTab) {
-                        localStorage.setItem('lastActiveTab', activeTab.dataset.tab);
-                    }
-                    // lastReadNotificationDateは退避
-                    const lastReadNotificationDate = localStorage.getItem('lastReadNotificationDate');
-                    // 旧データ件数を保存
-                    let oldCount = 0;
-                    try {
-                        const oldData = JSON.parse(localStorage.getItem('dungeonDataCache') || '{}');
-                        oldCount = Object.keys(oldData).reduce((sum, k) => sum + Object.keys(oldData[k]||{}).length, 0);
-                    } catch(e) {}
-                    // クッキー全削除
-                    document.cookie.split(';').forEach(function(c) {
-                        document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
-                    });
-                    // ServiceWorkerキャッシュもクリア
-                    if ('caches' in window) {
-                        const cacheNames = await caches.keys();
-                        for (const name of cacheNames) {
-                            await caches.delete(name);
+                // データ同期ボタン
+                const syncButton = document.getElementById('syncButton');
+                if (syncButton) {
+                    syncButton.addEventListener('click', async () => {
+                        syncButton.disabled = true;
+                        syncButton.textContent = '同期中...';
+                        // 現在のタブ情報を保存
+                        const activeTab = document.querySelector('.tab-button.active');
+                        if (activeTab) {
+                            localStorage.setItem('lastActiveTab', activeTab.dataset.tab);
                         }
+                        // lastReadNotificationDateは退避
+                        const lastReadNotificationDate = localStorage.getItem('lastReadNotificationDate');
+                        // 旧データ件数を保存
+                        let oldCount = 0;
+                        try {
+                            const oldData = JSON.parse(localStorage.getItem('dungeonDataCache') || '{}');
+                            oldCount = Object.keys(oldData).reduce((sum, k) => sum + Object.keys(oldData[k] || {}).length, 0);
+                        } catch (e) {}
+                        // クッキー全削除
+                        document.cookie.split(';').forEach(function(c) {
+                            document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
+                        });
+                        // ServiceWorkerキャッシュもクリア
+                        if ('caches' in window) {
+                            const cacheNames = await caches.keys();
+                            for (const name of cacheNames) {
+                                await caches.delete(name);
+                            }
+                        }
+                        // ファイルキャッシュバスター付きで再取得
+                        const bust = '?t=' + new Date().getTime();
+                        const files = [
+                            'index.html',
+                            'dungeonData.json',
+                            'pad_experience_data.json',
+                            'style.css',
+                            'announcements.json'
+                        ];
+                        try {
+                            await Promise.all(files.map(f => fetch(f + bust, {
+                                cache: 'reload'
+                            })));
+                        } catch (e) {}
+                        // lastReadNotificationDateを復元
+                        if (lastReadNotificationDate) {
+                            localStorage.setItem('lastReadNotificationDate', lastReadNotificationDate);
+                        }
+                        // 新データ件数を取得
+                        let newCount = 0;
+                        try {
+                            const res = await fetch('dungeonData.json?t=' + new Date().getTime());
+                            const newData = await res.json();
+                            newCount = Object.keys(newData).reduce((sum, k) => sum + Object.keys(newData[k] || {}).length, 0);
+                            localStorage.setItem('dungeonDataCache', JSON.stringify(newData));
+                        } catch (e) {}
+                        // 件数差分を通知
+                        if (newCount > oldCount) {
+                            showSyncNotification(`${newCount-oldCount}件の新しいデータを同期しました`);
+                        }
+                        // 強制リロード
+                        location.reload(true);
+                    });
+                    // 同期通知バー
+                    function showSyncNotification(msg) {
+                        let bar = document.getElementById('sync-notification-bar');
+                        if (!bar) {
+                            bar = document.createElement('div');
+                            bar.id = 'sync-notification-bar';
+                            bar.style.position = 'fixed';
+                            bar.style.top = '0';
+                            bar.style.left = '0';
+                            bar.style.width = '100%';
+                            bar.style.background = '#1976d2';
+                            bar.style.color = '#fff';
+                            bar.style.textAlign = 'center';
+                            bar.style.zIndex = '9999';
+                            bar.style.padding = '8px 0';
+                            document.body.appendChild(bar);
+                        }
+                        bar.textContent = msg;
+                        bar.style.display = 'block';
+                        setTimeout(() => {
+                            bar.style.display = 'none';
+                        }, 6000);
                     }
-                    // ファイルキャッシュバスター付きで再取得
-                    const bust = '?t=' + new Date().getTime();
-                    const files = [
-                        'index.html',
-                        'dungeonData.json',
-                        'pad_experience_data.json',
-                        'style.css',
-                        'announcements.json'
-                    ];
-                    try {
-                        await Promise.all(files.map(f => fetch(f + bust, {cache: 'reload'})));
-                    } catch (e) {}
-                    // lastReadNotificationDateを復元
-                    if (lastReadNotificationDate) {
-                        localStorage.setItem('lastReadNotificationDate', lastReadNotificationDate);
-                    }
-                    // 新データ件数を取得
-                    let newCount = 0;
-                    try {
-                        const res = await fetch('dungeonData.json?t=' + new Date().getTime());
-                        const newData = await res.json();
-                        newCount = Object.keys(newData).reduce((sum, k) => sum + Object.keys(newData[k]||{}).length, 0);
-                        localStorage.setItem('dungeonDataCache', JSON.stringify(newData));
-                    } catch(e) {}
-                    // 件数差分を通知
-                    if (newCount > oldCount) {
-                        showSyncNotification(`${newCount-oldCount}件の新しいデータを同期しました`);
-                    }
-                    // 強制リロード
-                    location.reload(true);
-                });
-                // 同期通知バー
-                function showSyncNotification(msg) {
-                    let bar = document.getElementById('sync-notification-bar');
-                    if (!bar) {
-                        bar = document.createElement('div');
-                        bar.id = 'sync-notification-bar';
-                        bar.style.position = 'fixed';
-                        bar.style.top = '0';
-                        bar.style.left = '0';
-                        bar.style.width = '100%';
-                        bar.style.background = '#1976d2';
-                        bar.style.color = '#fff';
-                        bar.style.textAlign = 'center';
-                        bar.style.zIndex = '9999';
-                        bar.style.padding = '8px 0';
-                        document.body.appendChild(bar);
-                    }
-                    bar.textContent = msg;
-                    bar.style.display = 'block';
-                    setTimeout(()=>{ bar.style.display = 'none'; }, 6000);
+                    // リロード後に前回のタブを復元
+                    window.addEventListener('DOMContentLoaded', () => {
+                        const lastActiveTab = localStorage.getItem('lastActiveTab');
+                        if (lastActiveTab) {
+                            const tabBtn = document.querySelector(`.tab-button[data-tab="${lastActiveTab}"]`);
+                            if (tabBtn) tabBtn.click();
+                            localStorage.removeItem('lastActiveTab');
+                        }
+                    });
                 }
-            // リロード後に前回のタブを復元
-            window.addEventListener('DOMContentLoaded', () => {
-                const lastActiveTab = localStorage.getItem('lastActiveTab');
-                if (lastActiveTab) {
-                    const tabBtn = document.querySelector(`.tab-button[data-tab="${lastActiveTab}"]`);
-                    if (tabBtn) tabBtn.click();
-                    localStorage.removeItem('lastActiveTab');
-                }
-            });
-            }
                 try {
                     const response = await fetch(`./announcements.json?t=${new Date().getTime()}`);
                     if (!response.ok) throw new Error('お知らせファイルの読み込みに失敗');
-                    
+
                     const notifications = await response.json();
                     notificationList.innerHTML = '';
 
                     if (notifications && notifications.length > 0) {
                         // お知らせが日付順にソートされていると仮定し、最新の日付を取得
                         latestNotificationDate = notifications[0].date;
-                        
+
                         // ブラウザから最後に読んだお知らせの日付を取得
                         const lastReadDate = localStorage.getItem('lastReadNotificationDate');
                         let unreadCount = 0;
@@ -770,7 +786,7 @@
 
             popupOverlay.addEventListener('click', () => notificationPopup.classList.add('hidden'));
             popupCloseButton.addEventListener('click', () => popupCloseButton.parentElement.parentElement.classList.add('hidden'));
-            
+
             // ----------- PWA と 初期化処理 -----------
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./sw.js')
