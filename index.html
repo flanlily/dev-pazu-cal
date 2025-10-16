@@ -44,21 +44,7 @@
 
             <div class="tab-content hidden" id="hp">
                 <div class="hp-section">
-                    <h3 id="hp-section-leader-hp" style="background:#e3f2fd;border-left:6px solid #1976d2;padding:8px 12px;margin-top:0;margin-bottom:12px;border-radius:4px;">実質リーダーHP倍率</h3>
-                    <div class="input-group">
-                        <label>HP倍率</label>
-                        <input type="number" min="1" step="0.01" id="leaderHpMulti" placeholder="例: 2.6">
-                        <label>軽減率1（0〜1）</label>
-                        <input type="number" min="0" max="1" step="0.01" id="leaderReduce1" placeholder="例: 0.5 (50%軽減)">
-                        <label>軽減率2（0〜1、なければ0）</label>
-                        <input type="number" min="0" max="1" step="0.01" id="leaderReduce2" placeholder="例: 0.3 (30%軽減)">
-                        <label>軽減率3（0〜1、なければ0）</label>
-                        <input type="number" min="0" max="1" step="0.01" id="leaderReduce3" placeholder="例: 0.2 (20%軽減)">
-                        <label>L字軽減の数（ない場合0）</label>
-                        <input type="number" min="0" step="1" id="leaderLCount" placeholder="例: 2">
-                        <div class="hp-result" id="leaderActualHpResult">-</div>
-                    </div>
-                    <h3 id="hp-section-1" style="background:#e3f2fd;border-left:6px solid #1976d2;padding:8px 12px;margin-top:0;margin-bottom:12px;border-radius:4px;">1. パーティ合計HP計算</h3>
+                    <h3 id="hp-section-1">1. パーティ合計HP計算</h3>
                     <div class="input-group hp-party-inputs">
                         <label>各キャラのHPを入力（6体分）</label>
                         <div>
@@ -79,7 +65,7 @@
                     </div>
                 </div>
                 <div class="hp-section">
-                    <h3 id="hp-section-2" style="background:#e3f2fd;border-left:6px solid #1976d2;padding:8px 12px;margin-top:0;margin-bottom:12px;border-radius:4px;">2. チームHP覚醒で盛れているHP</h3>
+                    <h3 id="hp-section-2">2. チームHP覚醒で盛れているHP</h3>
                     <div class="input-group">
                         <label>合計HP</label>
                         <input type="number" min="0" id="teamTotalHp" placeholder="合計HP">
@@ -89,7 +75,7 @@
                     </div>
                 </div>
                 <div class="hp-section">
-                    <h3 id="hp-section-3" style="background:#e3f2fd;border-left:6px solid #1976d2;padding:8px 12px;margin-top:0;margin-bottom:12px;border-radius:4px;">3. 実質HP計算</h3>
+                    <h3 id="hp-section-3">3. 実質HP計算</h3>
                     <div class="input-group">
                         <strong>L（リーダー）</strong><br>
                         <label>HP倍率</label>
@@ -112,7 +98,7 @@
                     </div>
                 </div>
                 <div class="hp-section">
-                    <h3 id="hp-section-4" style="background:#e3f2fd;border-left:6px solid #1976d2;padding:8px 12px;margin-top:0;margin-bottom:12px;border-radius:4px;">4. チームHP覚醒個数逆算</h3>
+                    <h3 id="hp-section-4">4. チームHP覚醒個数逆算</h3>
                     <div class="input-group">
                         <label>目標HP</label>
                         <input type="number" min="0" id="targetHp" placeholder="目標HP">
@@ -335,37 +321,6 @@
 
             function setupHpTab() {
                 if (hpTabInitialized) return;
-                // 実質リーダーHP倍率
-                const leaderHpMulti = document.getElementById('leaderHpMulti');
-                const leaderReduce1 = document.getElementById('leaderReduce1');
-                const leaderReduce2 = document.getElementById('leaderReduce2');
-                const leaderReduce3 = document.getElementById('leaderReduce3');
-                const leaderLCount = document.getElementById('leaderLCount');
-                const leaderActualHpResult = document.getElementById('leaderActualHpResult');
-
-                function calcLeaderActualHp() {
-                    const hpMulti = parseFloat(leaderHpMulti.value) || 1;
-                    const reduce1 = parseFloat(leaderReduce1.value) || 0;
-                    const reduce2 = parseFloat(leaderReduce2.value) || 0;
-                    const reduce3 = parseFloat(leaderReduce3.value) || 0;
-                    const lCount = parseInt(leaderLCount.value) || 0;
-                    if (reduce1 >= 1 || reduce2 >= 1 || reduce3 >= 1) {
-                        leaderActualHpResult.textContent = '軽減率は1未満で入力してください';
-                        return;
-                    }
-                    const ljiReduce = 1 - 0.05 * lCount;
-                    if (ljiReduce <= 0) {
-                        leaderActualHpResult.textContent = 'L字軽減数が多すぎます';
-                        return;
-                    }
-                    const actualRate = hpMulti / (1 - reduce1) / (1 - reduce2) / (1 - reduce3) / ljiReduce;
-                    leaderActualHpResult.textContent = `実質HP${actualRate.toFixed(2)}倍`;
-                }
-                [leaderHpMulti, leaderReduce1, leaderReduce2, leaderReduce3, leaderLCount].forEach(el => {
-                    el.addEventListener('input', calcLeaderActualHp);
-                });
-                calcLeaderActualHp();
-                // ...existing code...
                 // 1. パーティ合計HP計算
                 const hpInputs = [1, 2, 3, 4, 5, 6].map(i => document.getElementById('hp' + i));
                 const totalHpResult = document.getElementById('totalHpResult');
@@ -502,7 +457,10 @@
                     totalReductionRateDisplay.textContent = '個数は0以上で入力してください。';
                     return;
                 }
-                
+
+                // ===== ▼▼▼【今度こそ、ご指定の正しいロジックです】▼▼▼
+                // 軽減率計算
+                // (1 - A) * (1 - B) * (1 - C) * (1 - 0.05 * L)
                 const leaderReduce = 1 - valA;
                 const friendReduce = 1 - valB;
                 const skillReduce = 1 - valC;
