@@ -329,8 +329,13 @@
                 friendMultiplier.addEventListener('change', calculateExp);
                 dungeonBonusCount.addEventListener('input', calculateExp);
                 document.getElementById('adDouble').addEventListener('change', calculateExp);
+                // ▼▼▼【この行を修正・追加しました】▼▼▼
+                document.getElementById('badgeBonus').addEventListener('change', calculateExp);
                 expTabInitialized = true;
             }
+
+            function setupHpTab() {
+                if (hpTabInitialized) return;
 
             function setupHpTab() {
                 if (hpTabInitialized) return;
@@ -812,3 +817,4 @@
         </script>
     </body>
 </html>
+
