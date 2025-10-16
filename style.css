@@ -6,7 +6,6 @@
     padding: 14px 10px 10px 10px;
     box-shadow: 0 1px 6px rgba(33,150,243,0.07);
 }
-/* ▼▼▼【ここから修正箇所】▼▼▼ */
 .hp-section h3 {
     background: #e3f2fd;
     border-left: 6px solid #1976d2;
@@ -14,10 +13,9 @@
     margin-top: 0;
     margin-bottom: 12px;
     border-radius: 4px;
-    color: #1976d2; /* 文字色を濃い青に変更 */
+    color: #1976d2;
     font-size: 1.1em;
 }
-/* ▲▲▲【ここまで修正箇所】▲▲▲ */
 .hp-party-inputs {
     display: flex;
     gap: 6px;
@@ -68,7 +66,7 @@ body {
     max-width: 95vw;
     width: 100%;
     margin: 0 auto;
-        background: rgba(227, 242, 253, 0.7); /* 薄い青色+透過 */
+    background: rgba(227, 242, 253, 0.7); /* 薄い青色+透過 */
     padding: 18px 8px 28px 8px;
     border-radius: 16px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.18);
@@ -88,7 +86,7 @@ h1, h2 {
     word-break: break-word; /* 長いタイトル対策 */
 }
 
-p, label, .note {
+p, .note {
     color: #e3f2fd;
 }
 
@@ -246,6 +244,27 @@ button:focus {
     display: none;
 }
 
+/* HP計算タブ内の特定のスタイル */
+#hp .input-group strong {
+    display: inline-block;
+    background-color: #1976d2; /* 青い背景 */
+    color: #e3f2fd;           /* 明るい文字色 */
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 1em;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+/* input-group内のsmallタグ（説明文）の色を調整 */
+.input-group small {
+    color: #bbdefb;
+    font-weight: normal;
+    display: block;
+    margin-top: 4px;
+    padding: 0 4px;
+}
+
 /* ------------------ スマホ用メディアクエリ ------------------ */
 @media (max-width: 600px) {
     body {
@@ -298,10 +317,6 @@ button:focus {
 }
 
 /* ===== ▼お知らせ機能スタイル ここから▼ ===== */
-
-
-
-
 /* お知らせアイコン */
 .notification-icon {
     width: 40px;
@@ -476,14 +491,4 @@ button:focus {
 #popupCloseButton:hover {
     background: linear-gradient(90deg, #1565c0 60%, #64b5f6 100%);
 }
-
 /* ===== ▲お知らせ機能スタイル ここまで▲ ===== */
-
-/* input-group内のsmallタグ（説明文）の色を調整 */
-.input-group small {
-    color: #bbdefb; /* 他のラベルと同じ薄い青色 */
-    font-weight: normal; /* 太字を解除 */
-    display: block;
-    margin-top: 4px;
-    padding: 0 4px;
-}
