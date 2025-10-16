@@ -2,8 +2,8 @@
 <html lang="ja">
 
     <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
         <link href="style.css" rel="stylesheet" />
         <style>
             body {
@@ -11,11 +11,11 @@
                 background-size: cover;
             }
         </style>
-    <title>PDC非対応計算ツール</title>
-    <link href="./manifest.json" rel="manifest" />
-    <meta content="#0078d7" name="theme-color" />
-    <!-- スプラッシュ画像 -->
-    <link rel="apple-touch-startup-image" href="20250922.png" />
+        <title>PDC非対応計算ツール</title>
+        <link href="./manifest.json" rel="manifest" />
+        <meta content="#0078d7" name="theme-color" />
+        <!-- スプラッシュ画像 -->
+        <link rel="apple-touch-startup-image" href="20250922.png" />
     </head>
 
     <body>
@@ -30,8 +30,7 @@
             <div class="popup-overlay" id="popupOverlay"></div>
             <div class="popup-content">
                 <h2>お知らせ</h2>
-                <div id="notification-list">
-                    </div>
+                <div id="notification-list"></div>
                 <button id="popupCloseButton">閉じる</button>
             </div>
         </div>
@@ -238,6 +237,13 @@
                         <option value="2">2倍</option>
                     </select>
                 </div>
+                <div class="input-group">
+                    <label for="badgeBonus">バッジ効果</label>
+                    <select id="badgeBonus">
+                        <option value="1">なし</option>
+                        <option value="1.1">10%UP</option>
+                    </select>
+                </div>
                 <div id="expResult">
                     <h2>経験値結果</h2>
                     <p id="expValue">-</p>
@@ -336,22 +342,22 @@
                 const leaderReduce3 = document.getElementById('leaderReduce3');
                 const leaderLCount = document.getElementById('leaderLCount');
                 const leaderActualHpResult = document.getElementById('leaderActualHpResult');
-                function calcLeaderActualHp() {
-                    const hpMulti = parseFloat(leaderHpMulti.value) || 1;
-                    const reduce1 = parseFloat(leaderReduce1.value) || 0;
-                    const reduce2 = parseFloat(leaderReduce2.value) || 0;
-                    const reduce3 = parseFloat(leaderReduce3.value) || 0;
-                    const lCount = parseInt(leaderLCount.value) || 0;
+            function calcLeaderActualHp() {
+                const hpMulti = parseFloat(leaderHpMulti.value) || 1;
+                const reduce1 = parseFloat(leaderReduce1.value) || 0;
+                const reduce2 = parseFloat(leaderReduce2.value) || 0;
+                const reduce3 = parseFloat(leaderReduce3.value) || 0;
+                const lCount = parseInt(leaderLCount.value) || 0;
                     if (reduce1 >= 1 || reduce2 >= 1 || reduce3 >= 1) {
                         leaderActualHpResult.textContent = '軽減率は1未満で入力してください';
                         return;
                     }
-                    const ljiReduce = 1 - 0.05 * lCount;
+                const ljiReduce = 1 - 0.05 * lCount;
                     if (ljiReduce <= 0) {
                         leaderActualHpResult.textContent = 'L字軽減数が多すぎます';
                         return;
                     }
-                    const actualRate = hpMulti / (1 - reduce1) / (1 - reduce2) / (1 - reduce3) / ljiReduce;
+                const actualRate = hpMulti / (1 - reduce1) / (1 - reduce2) / (1 - reduce3) / ljiReduce;
                     leaderActualHpResult.textContent = `実質HP${actualRate.toFixed(2)}倍`;
                 }
                 [leaderHpMulti, leaderReduce1, leaderReduce2, leaderReduce3, leaderLCount].forEach(el => {
@@ -365,24 +371,24 @@
                 const partyLHpMulti = document.getElementById('partyLHpMulti');
                 const partyFHpMulti = document.getElementById('partyFHpMulti');
                 const partyTeamHpAwakeCount = document.getElementById('partyTeamHpAwakeCount');
-                function calcTotalHp() {
-                    const hps = hpInputs.map(input => parseInt(input.value) || 0);
-                    const total = hps.reduce((a,b) => a+b, 0);
-                    const lMulti = parseFloat(partyLHpMulti.value) || 1;
-                    const fMulti = parseFloat(partyFHpMulti.value) || 1;
-                    const teamHpAwake = parseInt(partyTeamHpAwakeCount.value) || 0;
-                    // チームHP覚醒倍率
-                    const teamHpAwakeMulti = 1 + 0.05 * teamHpAwake;
-                    // L/F平均倍率
-                    const avgMulti = (lMulti + fMulti) / 2;
-                    // 計算
-                    let resultText = '-';
-                    if (total > 0) {
-                        const afterMulti = Math.floor(total * avgMulti);
-                        const afterAwake = Math.floor(afterMulti * teamHpAwakeMulti);
-                        resultText = `合計HP: ${total.toLocaleString()} → L/F倍率後: ${afterMulti.toLocaleString()} → チームHP覚醒後: ${afterAwake.toLocaleString()}`;
-                    }
-                    totalHpResult.textContent = resultText;
+            function calcTotalHp() {
+                const hps = hpInputs.map(input => parseInt(input.value) || 0);
+                const total = hps.reduce((a,b) => a+b, 0);
+                const lMulti = parseFloat(partyLHpMulti.value) || 1;
+                const fMulti = parseFloat(partyFHpMulti.value) || 1;
+                const teamHpAwake = parseInt(partyTeamHpAwakeCount.value) || 0;
+                // チームHP覚醒倍率
+                const teamHpAwakeMulti = 1 + 0.05 * teamHpAwake;
+                // L/F平均倍率
+                const avgMulti = (lMulti + fMulti) / 2;
+                // 計算
+                let resultText = '-';
+                if (total > 0) {
+                    const afterMulti = Math.floor(total * avgMulti);
+                    const afterAwake = Math.floor(afterMulti * teamHpAwakeMulti);
+                    resultText = `合計HP: ${total.toLocaleString()} → L/F倍率後: ${afterMulti.toLocaleString()} → チームHP覚醒後: ${afterAwake.toLocaleString()}`;
+                }
+                totalHpResult.textContent = resultText;
                 }
                 hpInputs.forEach(input => input.addEventListener('input', calcTotalHp));
                 partyLHpMulti.addEventListener('input', calcTotalHp);
@@ -410,8 +416,8 @@
             });
 
             // 初期表示時にdamageタブだけでなく、activeなタブの初期化も行う
-            const activeTab = document.querySelector('.tab-button.active');
-            if (activeTab) {
+                const activeTab = document.querySelector('.tab-button.active');
+                if (activeTab) {
                 if(activeTab.dataset.tab === 'damage') setupDamageTab();
                 if(activeTab.dataset.tab === 'exp') setupExpTab();
                 if(activeTab.dataset.tab === 'hp') setupHpTab();
@@ -588,7 +594,15 @@
                 const bonusCount = parseInt(dungeonBonusCount.value) || 0;
                 const bonusMultiplier = Math.pow(1.02, bonusCount);
                 const adDouble = parseFloat(document.getElementById('adDouble').value) || 1;
-                const totalExp = baseExp * leaderMulti * friendMulti * bonusMultiplier * adDouble;
+                const badgeBonus = parseFloat(document.getElementById('badgeBonus').value) || 1;
+                // 広告までの計算結果を一時保存
+                const preBadgeExp = baseExp * leaderMulti * friendMulti * bonusMultiplier * adDouble;
+                let totalExp;
+                if (badgeBonus === 1.1) {
+                    totalExp = preBadgeExp * 1.1;
+                } else {
+                    totalExp = preBadgeExp;
+                }
                 expValueDisplay.textContent = `獲得経験値: ${Math.round(totalExp).toLocaleString()}`;
             }
 
