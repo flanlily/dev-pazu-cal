@@ -6,14 +6,18 @@
     padding: 14px 10px 10px 10px;
     box-shadow: 0 1px 6px rgba(33,150,243,0.07);
 }
+/* ▼▼▼【ここから修正箇所】▼▼▼ */
 .hp-section h3 {
-    color: #bbdefb;
+    background: #e3f2fd;
+    border-left: 6px solid #1976d2;
+    padding: 8px 12px;
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+    color: #1976d2; /* 文字色を濃い青に変更 */
     font-size: 1.1em;
-    border-bottom: 1px solid #1976d2;
-    padding-bottom: 4px;
 }
+/* ▲▲▲【ここまで修正箇所】▲▲▲ */
 .hp-party-inputs {
     display: flex;
     gap: 6px;
@@ -475,7 +479,6 @@ button:focus {
 
 /* ===== ▲お知らせ機能スタイル ここまで▲ ===== */
 
-/* ▼▼▼【ここから修正箇所】▼▼▼ */
 /* input-group内のsmallタグ（説明文）の色を調整 */
 .input-group small {
     color: #bbdefb; /* 他のラベルと同じ薄い青色 */
@@ -484,4 +487,3 @@ button:focus {
     margin-top: 4px;
     padding: 0 4px;
 }
-/* ▲▲▲【ここまで修正箇所】▲▲▲ */
