@@ -398,7 +398,7 @@
                 calcTotalHp();
                 // ...existing code...
                 hpTabInitialized = true;
-            } // <<<【修正点】不足していた閉じ括弧 `}` をここに追加しました
+            } 
 
             // タブ切り替え時に該当タブの初期化関数を呼ぶ
             tabs.forEach(tab => {
@@ -482,7 +482,8 @@
 
                 if (!selectedDungeon || !selectedFloor) {
                     totalReductionRateDisplay.textContent = '';
-                    if (selectedDungeon && selectedFloor && damageDungeonData[selectedDungeon] ? .[selectedFloor]) {
+                    // ▼▼▼【修正点】`?.` を使わない形に変更しました ▼▼▼
+                    if (selectedDungeon && selectedFloor && damageDungeonData[selectedDungeon] && damageDungeonData[selectedDungeon][selectedFloor]) {
                         const damageRatios = damageDungeonData[selectedDungeon][selectedFloor];
                         damageRatios.forEach(ratio => {
                             const tr = document.createElement('tr');
