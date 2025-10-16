@@ -474,3 +474,14 @@ button:focus {
 }
 
 /* ===== ▲お知らせ機能スタイル ここまで▲ ===== */
+
+/* ▼▼▼【ここから修正箇所】▼▼▼ */
+/* input-group内のsmallタグ（説明文）の色を調整 */
+.input-group small {
+    color: #bbdefb; /* 他のラベルと同じ薄い青色 */
+    font-weight: normal; /* 太字を解除 */
+    display: block;
+    margin-top: 4px;
+    padding: 0 4px;
+}
+/* ▲▲▲【ここまで修正箇所】▲▲▲ */
