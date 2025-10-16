@@ -781,13 +781,13 @@
             async function initializeAll() {
                 damageDungeonData = await fetchDamageDungeonData();
                 expData = await fetchExpData();
-                
+
                 initializeDamageDungeonSelect();
                 initializeExpDungeonSelect();
-                
+
                 runDamageCalculation();
                 calculateExp();
-                
+
                 fetchAndShowNotifications();
             }
 
