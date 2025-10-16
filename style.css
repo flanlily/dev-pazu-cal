@@ -244,17 +244,16 @@ button:focus {
     display: none;
 }
 
-/* HP計算タブ内の特定のスタイル */
+/* ▼▼▼【ここから修正箇所】▼▼▼ */
+/* HP計算タブ内の見出し（L/F）のスタイル */
 #hp .input-group strong {
     display: inline-block;
-    background-color: #1976d2; /* 青い背景 */
-    color: #e3f2fd;           /* 明るい文字色 */
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 1em;
+    color: #bbdefb; /* 他のラベルと同じ薄い青色 */
+    font-size: 1.1em;
     font-weight: bold;
     margin-bottom: 8px;
 }
+/* ▲▲▲【ここまで修正箇所】▲▲▲ */
 
 /* input-group内のsmallタグ（説明文）の色を調整 */
 .input-group small {
