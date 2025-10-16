@@ -329,13 +329,9 @@
                 friendMultiplier.addEventListener('change', calculateExp);
                 dungeonBonusCount.addEventListener('input', calculateExp);
                 document.getElementById('adDouble').addEventListener('change', calculateExp);
-                // ▼▼▼【この行を修正・追加しました】▼▼▼
                 document.getElementById('badgeBonus').addEventListener('change', calculateExp);
                 expTabInitialized = true;
             }
-
-            function setupHpTab() {
-                if (hpTabInitialized) return;
 
             function setupHpTab() {
                 if (hpTabInitialized) return;
@@ -401,7 +397,6 @@
                 partyFHpMulti.addEventListener('input', calcTotalHp);
                 partyTeamHpAwakeCount.addEventListener('input', calcTotalHp);
                 calcTotalHp();
-                // ...existing code...
                 hpTabInitialized = true;
             } 
 
@@ -487,7 +482,6 @@
 
                 if (!selectedDungeon || !selectedFloor) {
                     totalReductionRateDisplay.textContent = '';
-                    // ▼▼▼【修正点】`?.` を使わない形に変更しました ▼▼▼
                     if (selectedDungeon && selectedFloor && damageDungeonData[selectedDungeon] && damageDungeonData[selectedDungeon][selectedFloor]) {
                         const damageRatios = damageDungeonData[selectedDungeon][selectedFloor];
                         damageRatios.forEach(ratio => {
@@ -508,28 +502,22 @@
                     totalReductionRateDisplay.textContent = '個数は0以上で入力してください。';
                     return;
                 }
-
-                // ===== ▼▼▼【今度こそ、ご指定の正しいロジックです】▼▼▼
-                // 軽減率計算
-                // (1 - A) * (1 - B) * (1 - C) * (1 - 0.05 * L)
+                
                 const leaderReduce = 1 - valA;
                 const friendReduce = 1 - valB;
                 const skillReduce = 1 - valC;
                 const lReduce = 1 - 0.05 * valL;
 
                 let totalReduce = leaderReduce * friendReduce * skillReduce * lReduce;
-                totalReduce = Math.max(0, Math.min(1, totalReduce)); // 0〜1に制限
+                totalReduce = Math.max(0, Math.min(1, totalReduce));
                 const totalReducePercent = ((1 - totalReduce) * 100).toFixed(2);
                 totalReductionRateDisplay.textContent = `総軽減率: ${totalReducePercent}%`;
 
 
-                // ダメージ軽減後のダメージを表示
                 const damageRatios = damageDungeonData[selectedDungeon][selectedFloor];
 
                 damageRatios.forEach(ratio => {
 
-                    // ratio は元のダメージ割合（例：100%）
-                    // totalReduce は「残りダメージ倍率」なので、ratio * totalReduce が正しい
                     const finalDamagePercent = (ratio * totalReduce).toFixed(2);
                     const canSurvive = finalDamagePercent < 100 ? '耐えられる' : '耐えられない';
 
@@ -541,7 +529,6 @@
                         `;
                     resultsTableBody.appendChild(tr);
                 });
-                // ===== ▲▲▲【ここまでが修正箇所です】▲▲▲
             }
 
 
@@ -588,32 +575,22 @@
             function calculateExp() {
                 const dungeonName = expDungeon.value;
                 const floorName = expFloor.value;
-                if (!dungeonName) {
-                    expValueDisplay.textContent = '-';
-                    return;
-                }
+                if (!dungeonName) { expValueDisplay.textContent = '-'; return; }
                 const floors = expData[dungeonName];
                 let baseExp;
                 if (typeof floors === 'object' && !Array.isArray(floors)) {
-                    if (!floorName) {
-                        expValueDisplay.textContent = '-';
-                        return;
-                    }
+                    if (!floorName) { expValueDisplay.textContent = '-'; return; }
                     baseExp = floors[floorName];
                 } else {
                     baseExp = floors;
                 }
-                if (typeof baseExp === 'undefined') {
-                    expValueDisplay.textContent = '-';
-                    return;
-                }
+                if (typeof baseExp === 'undefined') { expValueDisplay.textContent = '-'; return; }
                 const leaderMulti = parseFloat(leaderMultiplier.value);
                 const friendMulti = parseFloat(friendMultiplier.value);
                 const bonusCount = parseInt(dungeonBonusCount.value) || 0;
                 const bonusMultiplier = Math.pow(1.02, bonusCount);
                 const adDouble = parseFloat(document.getElementById('adDouble').value) || 1;
                 const badgeBonus = parseFloat(document.getElementById('badgeBonus').value) || 1;
-                // 広告までの計算結果を一時保存
                 const preBadgeExp = baseExp * leaderMulti * friendMulti * bonusMultiplier * adDouble;
                 let totalExp;
                 if (badgeBonus === 1.1) {
@@ -631,41 +608,34 @@
             const popupOverlay = document.getElementById('popupOverlay');
             const popupCloseButton = document.getElementById('popupCloseButton');
             const notificationList = document.getElementById('notification-list');
-
-            let latestNotificationDate = ''; // 最新のお知らせの日付を保持する変数
+            
+            let latestNotificationDate = '';
 
             async function fetchAndShowNotifications() {
-                // データ同期ボタン
                 const syncButton = document.getElementById('syncButton');
                 if (syncButton) {
                     syncButton.addEventListener('click', async () => {
                         syncButton.disabled = true;
                         syncButton.textContent = '同期中...';
-                        // 現在のタブ情報を保存
                         const activeTab = document.querySelector('.tab-button.active');
                         if (activeTab) {
                             localStorage.setItem('lastActiveTab', activeTab.dataset.tab);
                         }
-                        // lastReadNotificationDateは退避
                         const lastReadNotificationDate = localStorage.getItem('lastReadNotificationDate');
-                        // 旧データ件数を保存
                         let oldCount = 0;
                         try {
                             const oldData = JSON.parse(localStorage.getItem('dungeonDataCache') || '{}');
-                            oldCount = Object.keys(oldData).reduce((sum, k) => sum + Object.keys(oldData[k] || {}).length, 0);
-                        } catch (e) {}
-                        // クッキー全削除
+                            oldCount = Object.keys(oldData).reduce((sum, k) => sum + Object.keys(oldData[k]||{}).length, 0);
+                        } catch(e) {}
                         document.cookie.split(';').forEach(function(c) {
                             document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
                         });
-                        // ServiceWorkerキャッシュもクリア
                         if ('caches' in window) {
                             const cacheNames = await caches.keys();
                             for (const name of cacheNames) {
                                 await caches.delete(name);
                             }
                         }
-                        // ファイルキャッシュバスター付きで再取得
                         const bust = '?t=' + new Date().getTime();
                         const files = [
                             'index.html',
@@ -675,30 +645,23 @@
                             'announcements.json'
                         ];
                         try {
-                            await Promise.all(files.map(f => fetch(f + bust, {
-                                cache: 'reload'
-                            })));
+                            await Promise.all(files.map(f => fetch(f + bust, {cache: 'reload'})));
                         } catch (e) {}
-                        // lastReadNotificationDateを復元
                         if (lastReadNotificationDate) {
                             localStorage.setItem('lastReadNotificationDate', lastReadNotificationDate);
                         }
-                        // 新データ件数を取得
                         let newCount = 0;
                         try {
                             const res = await fetch('dungeonData.json?t=' + new Date().getTime());
                             const newData = await res.json();
-                            newCount = Object.keys(newData).reduce((sum, k) => sum + Object.keys(newData[k] || {}).length, 0);
+                            newCount = Object.keys(newData).reduce((sum, k) => sum + Object.keys(newData[k]||{}).length, 0);
                             localStorage.setItem('dungeonDataCache', JSON.stringify(newData));
-                        } catch (e) {}
-                        // 件数差分を通知
+                        } catch(e) {}
                         if (newCount > oldCount) {
                             showSyncNotification(`${newCount-oldCount}件の新しいデータを同期しました`);
                         }
-                        // 強制リロード
                         location.reload(true);
                     });
-                    // 同期通知バー
                     function showSyncNotification(msg) {
                         let bar = document.getElementById('sync-notification-bar');
                         if (!bar) {
@@ -717,11 +680,8 @@
                         }
                         bar.textContent = msg;
                         bar.style.display = 'block';
-                        setTimeout(() => {
-                            bar.style.display = 'none';
-                        }, 6000);
+                        setTimeout(()=>{ bar.style.display = 'none'; }, 6000);
                     }
-                    // リロード後に前回のタブを復元
                     window.addEventListener('DOMContentLoaded', () => {
                         const lastActiveTab = localStorage.getItem('lastActiveTab');
                         if (lastActiveTab) {
@@ -734,15 +694,13 @@
                 try {
                     const response = await fetch(`./announcements.json?t=${new Date().getTime()}`);
                     if (!response.ok) throw new Error('お知らせファイルの読み込みに失敗');
-
+                    
                     const notifications = await response.json();
                     notificationList.innerHTML = '';
 
                     if (notifications && notifications.length > 0) {
-                        // お知らせが日付順にソートされていると仮定し、最新の日付を取得
                         latestNotificationDate = notifications[0].date;
-
-                        // ブラウザから最後に読んだお知らせの日付を取得
+                        
                         const lastReadDate = localStorage.getItem('lastReadNotificationDate');
                         let unreadCount = 0;
 
@@ -752,13 +710,11 @@
                             div.innerHTML = `<strong>${item.date}</strong><p>${item.content}</p>`;
                             notificationList.appendChild(div);
 
-                            // 未読かどうかをチェック
                             if (!lastReadDate || item.date > lastReadDate) {
                                 unreadCount++;
                             }
                         });
 
-                        // 未読件数に応じてバッジを更新
                         if (unreadCount > 0) {
                             notificationBadge.textContent = unreadCount;
                             notificationBadge.classList.remove('hidden');
@@ -781,10 +737,9 @@
 
             notificationIcon.addEventListener('click', () => {
                 notificationPopup.classList.remove('hidden');
-                notificationBadge.classList.add('hidden'); // バッジを非表示に
-                notificationIcon.classList.remove('active'); // アニメーションを停止
+                notificationBadge.classList.add('hidden');
+                notificationIcon.classList.remove('active');
 
-                // ポップアップを開いた時点で、最新のお知らせを「既読」として記録
                 if (latestNotificationDate) {
                     localStorage.setItem('lastReadNotificationDate', latestNotificationDate);
                 }
@@ -792,7 +747,7 @@
 
             popupOverlay.addEventListener('click', () => notificationPopup.classList.add('hidden'));
             popupCloseButton.addEventListener('click', () => popupCloseButton.parentElement.parentElement.classList.add('hidden'));
-
+            
             // ----------- PWA と 初期化処理 -----------
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./sw.js')
@@ -803,13 +758,13 @@
             async function initializeAll() {
                 damageDungeonData = await fetchDamageDungeonData();
                 expData = await fetchExpData();
-
+                
                 initializeDamageDungeonSelect();
                 initializeExpDungeonSelect();
-
+                
                 runDamageCalculation();
                 calculateExp();
-
+                
                 fetchAndShowNotifications();
             }
 
@@ -817,4 +772,3 @@
         </script>
     </body>
 </html>
-
