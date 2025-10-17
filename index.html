@@ -567,6 +567,9 @@
                 const syncButton = document.getElementById('syncButton');
                 if (syncButton) {
                     syncButton.addEventListener('click', async () => {
+                        // ▼▼▼【ここから修正箇所】▼▼▼
+                        setRandomBackground(); // データ同期クリック時に背景をランダム変更
+                        // ▲▲▲【ここまで修正箇所】▲▲▲
                         syncButton.disabled = true;
                         syncButton.textContent = '同期中...';
                         const activeTab = document.querySelector('.tab-button.active');
@@ -707,7 +710,6 @@
                     .catch(error => console.error('Service Worker: 登録失敗', error));
             }
 
-            // ▼▼▼【ここから修正箇所】▼▼▼
             // ----------- 背景画像のランダム設定 -----------
             function setRandomBackground() {
                 const backgroundImages = [
@@ -718,6 +720,10 @@
                 const randomIndex = Math.floor(Math.random() * backgroundImages.length);
                 const selectedImage = backgroundImages[randomIndex];
                 document.body.style.backgroundImage = `url('${selectedImage}')`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center center';
+                document.body.style.backgroundRepeat = 'no-repeat';
+                document.body.style.backgroundAttachment = 'fixed';
             }
 
             async function initializeAll() {
@@ -733,7 +739,6 @@
                 
                 fetchAndShowNotifications();
             }
-            // ▲▲▲【ここまで修正箇所】▲▲▲
 
             initializeAll();
         </script>
