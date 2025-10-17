@@ -252,73 +252,86 @@
 
 
             // ----------- 経験値計算処理 -----------
-            function initializeExpDungeonSelect() {
-                expDungeon.innerHTML = '<option value="">ダンジョンを選択してください</option>';
-                for (const dungeonName in expData) {
-                    const option = document.createElement('option');
-                    option.value = dungeonName;
-                    option.textContent = dungeonName;
-                    expDungeon.appendChild(option);
-                }
-                expFloor.innerHTML = '<option value="">フロアを選択してください</option>';
-                expFloor.disabled = true;
-            }
+function initializeExpDungeonSelect() {
+    expDungeon.innerHTML = '<option value="">ダンジョンを選択してください</option>';
+    for (const dungeonName in expData) {
+        const option = document.createElement('option');
+        option.value = dungeonName;
+        option.textContent = dungeonName;
+        expDungeon.appendChild(option);
+    }
+    expFloor.innerHTML = '<option value="">フロアを選択してください</option>';
+    expFloor.disabled = true;
+}
 
-            expDungeon.addEventListener('change', () => {
-                const dungeonName = expDungeon.value;
-                expFloor.innerHTML = '<option value="">フロアを選択してください</option>';
-                expFloor.disabled = true;
-                expValueDisplay.textContent = '-';
+expDungeon.addEventListener('change', () => {
+    const dungeonName = expDungeon.value;
+    expFloor.innerHTML = '<option value="">フロアを選択してください</option>';
+    expFloor.disabled = true;
+    expValueDisplay.textContent = '-';
 
-                if (!dungeonName) return;
-                const floors = expData[dungeonName];
-                if (floors && typeof floors === 'object' && !Array.isArray(floors)) {
-                    for (const floorName in floors) {
-                        const option = document.createElement('option');
-                        option.value = floorName;
-                        option.textContent = floorName;
-                        expFloor.appendChild(option);
-                    }
-                    expFloor.disabled = false;
-                } else {
-                    expFloor.disabled = true;
-                }
-                calculateExp();
-            });
+    if (!dungeonName) return;
+    const floors = expData[dungeonName];
+    if (floors && typeof floors === 'object' && !Array.isArray(floors)) {
+        for (const floorName in floors) {
+            const option = document.createElement('option');
+            option.value = floorName;
+            option.textContent = floorName;
+            expFloor.appendChild(option);
+        }
+        expFloor.disabled = false;
+    } else {
+        expFloor.disabled = true;
+    }
+    calculateExp();
+});
 
-            expFloor.addEventListener('change', calculateExp);
-            leaderMultiplier.addEventListener('change', calculateExp);
-            friendMultiplier.addEventListener('change', calculateExp);
-            dungeonBonusCount.addEventListener('input', calculateExp);
+// イベントリスナーに新しいセレクトボックスを追加
+expFloor.addEventListener('change', calculateExp);
+leaderMultiplier.addEventListener('change', calculateExp);
+friendMultiplier.addEventListener('change', calculateExp);
+dungeonBonusCount.addEventListener('input', calculateExp);
+document.getElementById('padPassBonus').addEventListener('change', calculateExp); // ◀️ 追加
+document.getElementById('adDouble').addEventListener('change', calculateExp);
+document.getElementById('badgeBonus').addEventListener('change', calculateExp);
 
-            function calculateExp() {
-                const dungeonName = expDungeon.value;
-                const floorName = expFloor.value;
-                if (!dungeonName) { expValueDisplay.textContent = '-'; return; }
-                const floors = expData[dungeonName];
-                let baseExp;
-                if (typeof floors === 'object' && !Array.isArray(floors)) {
-                    if (!floorName) { expValueDisplay.textContent = '-'; return; }
-                    baseExp = floors[floorName];
-                } else {
-                    baseExp = floors;
-                }
-                if (typeof baseExp === 'undefined') { expValueDisplay.textContent = '-'; return; }
-                const leaderMulti = parseFloat(leaderMultiplier.value);
-                const friendMulti = parseFloat(friendMultiplier.value);
-                const bonusCount = parseInt(dungeonBonusCount.value) || 0;
-                const bonusMultiplier = Math.pow(1.02, bonusCount);
-                const adDouble = parseFloat(document.getElementById('adDouble').value) || 1;
-                const badgeBonus = parseFloat(document.getElementById('badgeBonus').value) || 1;
-                const preBadgeExp = baseExp * leaderMulti * friendMulti * bonusMultiplier * adDouble;
-                let totalExp;
-                if (badgeBonus === 1.1) {
-                    totalExp = preBadgeExp * 1.1;
-                } else {
-                    totalExp = preBadgeExp;
-                }
-                expValueDisplay.textContent = `獲得経験値: ${Math.round(totalExp).toLocaleString()}`;
-            }
+
+function calculateExp() {
+    const dungeonName = expDungeon.value;
+    const floorName = expFloor.value;
+    if (!dungeonName) { expValueDisplay.textContent = '-'; return; }
+    const floors = expData[dungeonName];
+    let baseExp;
+    if (typeof floors === 'object' && !Array.isArray(floors)) {
+        if (!floorName) { expValueDisplay.textContent = '-'; return; }
+        baseExp = floors[floorName];
+    } else {
+        baseExp = floors;
+    }
+    if (typeof baseExp === 'undefined') { expValueDisplay.textContent = '-'; return; }
+    const leaderMulti = parseFloat(leaderMultiplier.value);
+    const friendMulti = parseFloat(friendMultiplier.value);
+    const bonusCount = parseInt(dungeonBonusCount.value) || 0;
+    const bonusMultiplier = Math.pow(1.02, bonusCount);
+    
+    // パズパスと広告倍率の取得
+    const padPassBonus = parseFloat(document.getElementById('padPassBonus').value) || 1; // ◀️ 追加
+    const adDouble = parseFloat(document.getElementById('adDouble').value) || 1;
+    const badgeBonus = parseFloat(document.getElementById('badgeBonus').value) || 1;
+    
+    // 計算順序を修正
+    const baseWithMultipliers = baseExp * leaderMulti * friendMulti * bonusMultiplier;
+    const withPadPass = baseWithMultipliers * padPassBonus; // ◀️ パズパスボーナスを先に適用
+    const withAd = withPadPass * adDouble;
+    
+    let totalExp;
+    if (badgeBonus === 1.1) {
+        totalExp = withAd * 1.1;
+    } else {
+        totalExp = withAd;
+    }
+    expValueDisplay.textContent = `獲得経験値: ${Math.round(totalExp).toLocaleString()}`;
+}
 
             // ----------- お知らせ機能関連 -----------
             const notificationIcon = document.getElementById('notificationIcon');
