@@ -1,31 +1,30 @@
 name: Update Media List JSON
 
 on:
+  # ▼▼▼【この行を追加】▼▼▼
+  workflow_dispatch:
+  # ▲▲▲【ここまで】▲▲▲
   push:
     branches:
-      - main  # mainブランチにプッシュされた時に実行
+      - main
     paths:
-      - 'media_*.png' # media_*.png ファイルが変更された時のみ実行
+      - 'media_*.png'
 
 jobs:
   update-list:
     runs-on: ubuntu-latest
     steps:
-      # 1. リポジトリのコードをチェックアウト
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. media_*.png ファイルのリストを取得し、JSONを作成
       - name: Generate media-list.json
         run: |
           ls media_*.png | jq -R . | jq -s . > media-list.json
 
-      # 3. 変更があった場合のみコミットしてプッシュ
       - name: Commit and push if changed
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add media-list.json
-          # 変更がある場合のみコミット
           git diff --staged --quiet || git commit -m "Automated: Update media-list.json"
           git push
