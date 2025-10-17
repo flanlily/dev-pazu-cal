@@ -563,7 +563,7 @@
             
             let latestNotificationDate = '';
 
-                        async function fetchAndShowNotifications() {
+            async function fetchAndShowNotifications() {
                 const syncButton = document.getElementById('syncButton');
                 if (syncButton) {
                     syncButton.addEventListener('click', async () => {
@@ -595,7 +595,7 @@
                             'pad_experience_data.json',
                             'style.css',
                             'announcements.json',
-                            'media-list.json' // ◀️ ここが追加された行です
+                            'media-list.json'
                         ];
                         try {
                             await Promise.all(files.map(f => fetch(f + bust, {cache: 'reload'})));
@@ -688,7 +688,6 @@
                 }
             }
 
-
             notificationIcon.addEventListener('click', () => {
                 notificationPopup.classList.remove('hidden');
                 notificationBadge.classList.add('hidden');
@@ -704,41 +703,63 @@
             
             // ----------- PWA と 初期化処理 -----------
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => console.log('Service Worker: 登録成功', registration))
-                    .catch(error => console.error('Service Worker: 登録失敗', error));
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js')
+                        .then(registration => console.log('Service Worker: 登録成功', registration))
+                        .catch(error => console.error('Service Worker: 登録失敗', error));
+                });
             }
 
-            // ----------- 背景画像のランダム設定 -----------
-            function setRandomBackground() {
-                const backgroundImages = [
-                    'media_1760540514.png'
-                ];
-                if (backgroundImages.length === 0) return;
-                const randomIndex = Math.floor(Math.random() * backgroundImages.length);
-                const selectedImage = backgroundImages[randomIndex];
-                document.body.style.backgroundImage = `url('${selectedImage}')`;
-                document.body.style.backgroundSize = 'cover';
-                document.body.style.backgroundPosition = 'center center';
-                document.body.style.backgroundRepeat = 'no-repeat';
-                document.body.style.backgroundAttachment = 'fixed';
-            }
+            // ----------- 背景画像のランダム設定【修正箇所】 -----------
+            async function setRandomBackground() {
+                try {
+                    const response = await fetch('./media-list.json?t=' + new Date().getTime());
+                    if (!response.ok) {
+                        console.error('背景画像リストの読み込みに失敗しました。');
+                        return;
+                    }
+                    const backgroundImages = await response.json();
 
+                    if (!backgroundImages || backgroundImages.length === 0) return;
+                    
+                    const randomIndex = Math.floor(Math.random() * backgroundImages.length);
+                    const selectedImage = backgroundImages[randomIndex];
+                    document.body.style.backgroundImage = `url('${selectedImage}')`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center center';
+                    document.body.style.backgroundRepeat = 'no-repeat';
+                    document.body.style.backgroundAttachment = 'fixed';
+
+                } catch (error) {
+                    console.error('背景画像の設定中にエラーが発生しました:', error);
+                }
+            }
+            
+            // ----------- 全体の初期化処理【修正箇所】 -----------
             async function initializeAll() {
-                setRandomBackground(); // ランダム背景を設定
-                damageDungeonData = await fetchDamageDungeonData();
-                expData = await fetchExpData();
+                // 先に背景を設定する
+                await setRandomBackground(); 
                 
-                initializeDamageDungeonSelect();
-                initializeExpDungeonSelect();
-                
-                runDamageCalculation();
-                calculateExp();
-                
-                fetchAndShowNotifications();
+                // 他のデータ取得と初期化を並行して行う
+                await Promise.all([
+                    fetchDamageDungeonData(),
+                    fetchExpData(),
+                    fetchAndShowNotifications()
+                ]).then(([damageData, expDataValue, _]) => {
+                    damageDungeonData = damageData;
+                    expData = expDataValue;
+
+                    initializeDamageDungeonSelect();
+                    initializeExpDungeonSelect();
+                    
+                    runDamageCalculation();
+                    calculateExp();
+                });
             }
 
-            initializeAll();
+            // ページの読み込みが完了したら初期化処理を実行
+            window.addEventListener('load', initializeAll);
+
         </script>
     </body>
 </html>
