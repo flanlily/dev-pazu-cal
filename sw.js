@@ -1,66 +1,61 @@
-const CACHE_NAME = 'pdc-tool-cache-v2'; // キャッシュ名を変更して更新を促す
+const CACHE_NAME = 'pazu-cal-cache-v1';
+// キャッシュするファイルのリスト
 const urlsToCache = [
-  './',
-  './index.html',
-  './style.css',
-  './dungeonData.json',
-  './pad_experience_data.json',
-  './manifest.json',
-  './announcements.json' // 新しいお知らせファイルもキャッシュ対象に
+  '/',
+  '/index.html',
+  '/script.js', // script.jsに変更
+  '/style.css',
+  '/manifest.json',
+  '/dungeonData.json',
+  '/pad_experience_data.json',
+  '/announcements.json',
+  '/media-list.json',
+  // 注意: media_*.png ファイルは動的に増えるため、ここではキャッシュしない
 ];
 
-// インストール時の処理
+// インストール処理
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Service Worker: キャッシュを開きました');
+        console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   );
-  self.skipWaiting();
 });
 
-// 有効化時の処理（古いキャッシュの削除）
-self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.filter(cacheName => {
-                    return cacheName !== CACHE_NAME;
-                }).map(cacheName => {
-                    return caches.delete(cacheName);
-                })
-            );
-        })
-    );
-});
-
-// フェッチ時の処理（キャッシュ優先）
+// stale-while-revalidate 戦略
 self.addEventListener('fetch', event => {
-  // お知らせファイルは常にネットワークから取得し、キャッシュを更新する
-  if (event.request.url.includes('announcements.json')) {
-    event.respondWith(
-      fetch(event.request).then(response => {
-        // レスポンスをクローンして片方をキャッシュに保存
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseToCache);
-        });
-        return response;
-      }).catch(() => {
-        // オフラインの場合はキャッシュから返す
-        return caches.match(event.request);
-      })
-    );
-    return;
-  }
-  
-  // それ以外のリクエストはキャッシュを優先
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        return response || fetch(event.request);
-      })
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.match(event.request).then(response => {
+        // キャッシュがあればそれを返し、裏側でネットワークから新しいのを取得
+        const fetchPromise = fetch(event.request).then(networkResponse => {
+          // リクエストが成功した場合のみキャッシュを更新
+          if (networkResponse && networkResponse.status === 200) {
+            cache.put(event.request, networkResponse.clone());
+          }
+          return networkResponse;
+        });
+        // キャッシュがあればそれを返し、なければフェッチの結果を待つ
+        return response || fetchPromise;
+      });
+    })
+  );
+});
+
+// 古いキャッシュの削除
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
 });
