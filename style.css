@@ -50,17 +50,22 @@
     flex-wrap: nowrap;
 }
 
+/* ▼▼▼【ここから修正箇所】▼▼▼ */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    background: linear-gradient(135deg, #2196f3 0%, #1565c0 100%);
+    /* 背景色はデフォルトで設定し、JSで上書きする */
+    background-color: #1565c0;
     color: #fff;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 12px; /* 画面端での余白確保 */
+
+    /* 背景画像のスタイルをJS側で設定するため、こちらからは削除 */
 }
+/* ▲▲▲【ここまで修正箇所】▲▲▲ */
 
 .container {
     max-width: 95vw;
@@ -244,7 +249,6 @@ button:focus {
     display: none;
 }
 
-/* ▼▼▼【ここから修正箇所】▼▼▼ */
 /* HP計算タブ内の見出し（L/F）のスタイル */
 #hp .input-group strong {
     display: inline-block;
@@ -253,7 +257,6 @@ button:focus {
     font-weight: bold;
     margin-bottom: 8px;
 }
-/* ▲▲▲【ここまで修正箇所】▲▲▲ */
 
 /* input-group内のsmallタグ（説明文）の色を調整 */
 .input-group small {
