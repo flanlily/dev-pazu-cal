@@ -713,7 +713,21 @@
                     .catch(error => console.error('Service Worker: 登録失敗', error));
             }
 
+            // ▼▼▼【ここから修正箇所】▼▼▼
+            // ----------- 背景画像のランダム設定 -----------
+            function setRandomBackground() {
+                const backgroundImages = [
+                    'media_1760540514.png'
+                    // 他に 'media_' で始まる画像があれば、ここに追加してください
+                    // 例: 'media_another_image.png',
+                ];
+                const randomIndex = Math.floor(Math.random() * backgroundImages.length);
+                const selectedImage = backgroundImages[randomIndex];
+                document.body.style.backgroundImage = `url('${selectedImage}')`;
+            }
+
             async function initializeAll() {
+                setRandomBackground(); // ランダム背景を設定
                 damageDungeonData = await fetchDamageDungeonData();
                 expData = await fetchExpData();
                 
@@ -725,6 +739,7 @@
                 
                 fetchAndShowNotifications();
             }
+            // ▲▲▲【ここまで修正箇所】▲▲▲
 
             initializeAll();
         </script>
