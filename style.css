@@ -208,6 +208,7 @@ button:focus {
     max-width: 200px;
     padding: 10px 20px;
     font-size: 1rem;
+    white-space: nowrap; /* ◀️ この行で改行を防ぎます */
 }
 
 .tab-button.active {
@@ -328,7 +329,7 @@ button:focus {
 }
 .popup-content h2 { margin-top: 0; color: #bbdefb; border-bottom: 1px solid #42a5f5; padding-bottom: 10px; }
 .popup-content button {
-    margin-top: 10px; /* 閉じるボタンにマージン追加 */
+    margin-top: 10px;
 }
 
 #notification-list .notification-item { border-bottom: 1px solid #1976d2; padding: 10px 0; }
