@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return await response.json();
         } catch (error) {
             console.error(error);
-            alert(error.message);
+            // alert(error.message);
             return {};
         }
     }
@@ -261,12 +261,24 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchData('./pad_experience_data.json')
         ]);
         
+        // ▼▼▼【ここから修正】▼▼▼
+        // プルダウンの初期状態を設定
+        dungeonSelect.innerHTML = '<option value="">ダンジョンを選択してください</option>';
+        floorSelect.innerHTML = '<option value="">フロアを選択してください</option>';
+        floorSelect.disabled = true;
+        expDungeon.innerHTML = '<option value="">ダンジョンを選択してください</option>';
+        expFloor.innerHTML = '<option value="">フロアを選択してください</option>';
+        expFloor.disabled = true;
+
         Object.keys(damageDungeonData).forEach(name => dungeonSelect.add(new Option(name, name)));
         dungeonSelect.addEventListener('change', () => {
             floorSelect.innerHTML = '<option value="">フロアを選択してください</option>';
             const selected = dungeonSelect.value;
             if (selected && damageDungeonData[selected]) {
                 Object.keys(damageDungeonData[selected]).forEach(name => floorSelect.add(new Option(name, name)));
+                floorSelect.disabled = false;
+            } else {
+                floorSelect.disabled = true;
             }
             runDamageCalculation();
         });
@@ -275,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         expDungeon.addEventListener('change', () => {
             expFloor.innerHTML = '<option value="">フロアを選択してください</option>';
             const selected = expDungeon.value;
-            if (selected && typeof expData[selected] === 'object') {
+            if (selected && typeof expData[selected] === 'object' && !Array.isArray(expData[selected])) {
                 Object.keys(expData[selected]).forEach(name => expFloor.add(new Option(name, name)));
                 expFloor.disabled = false;
             } else {
@@ -283,6 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             calculateExp();
         });
+        // ▲▲▲【ここまで修正】▲▲▲
         
         setupTabs();
         setupPopupsAndSync();
