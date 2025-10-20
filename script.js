@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const linksPopupOverlay = document.getElementById('links-popup-overlay');
     const linksPopupCloseButton = document.getElementById('links-popup-close-button');
     
+    const syncButton = document.getElementById('syncButton');
+
     let damageDungeonData = {};
     let expData = {};
     let latestNotificationDate = '';
@@ -189,8 +191,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('totalHpResult').textContent = totalBaseHp > 0 ? `合計HP: ${finalTotalHp.toLocaleString()}` : '-';
     }
 
-    // ----------- ポップアップ処理 -----------
-    function setupPopups() {
+    // ----------- ポップアップと同期ボタンの処理 -----------
+    function setupPopupsAndSync() {
         notificationIcon.addEventListener('click', () => {
             notificationPopup.classList.remove('hidden');
             notificationBadge.classList.add('hidden');
@@ -205,6 +207,21 @@ document.addEventListener('DOMContentLoaded', () => {
         linksPopupButton.addEventListener('click', () => linksPopup.classList.remove('hidden'));
         linksPopupOverlay.addEventListener('click', () => linksPopup.classList.add('hidden'));
         linksPopupCloseButton.addEventListener('click', () => linksPopup.classList.add('hidden'));
+        
+        syncButton.addEventListener('click', async () => {
+            syncButton.disabled = true;
+            syncButton.textContent = '同期中...';
+            
+            const activeTab = document.querySelector('.tab-button.active');
+            if (activeTab) {
+                localStorage.setItem('lastActiveTab', activeTab.dataset.tab);
+            }
+            if ('caches' in window) {
+                const names = await caches.keys();
+                await Promise.all(names.map(name => caches.delete(name)));
+            }
+            location.reload(true);
+        });
     }
 
     async function fetchAndShowNotifications() {
@@ -249,11 +266,9 @@ document.addEventListener('DOMContentLoaded', () => {
             floorSelect.innerHTML = '<option value="">フロアを選択してください</option>';
             const selected = dungeonSelect.value;
             if (selected && damageDungeonData[selected]) {
-                const floors = String(damageDungeonData[selected]).split(',');
-                // Assuming floor names are not complex, otherwise parse properly
                 Object.keys(damageDungeonData[selected]).forEach(name => floorSelect.add(new Option(name, name)));
             }
-             runDamageCalculation();
+            runDamageCalculation();
         });
 
         Object.keys(expData).forEach(name => expDungeon.add(new Option(name, name)));
@@ -270,12 +285,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         setupTabs();
-        setupPopups();
+        setupPopupsAndSync();
         
-        const initialTab = document.querySelector('.tab-button.active');
+        const lastTab = localStorage.getItem('lastActiveTab');
+        const initialTab = lastTab ? document.querySelector(`.tab-button[data-tab="${lastTab}"]`) : document.querySelector('.tab-button.active');
         if (initialTab) {
             initialTab.click();
         }
+        localStorage.removeItem('lastActiveTab');
 
         fetchAndShowNotifications();
     }
