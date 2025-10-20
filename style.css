@@ -495,76 +495,62 @@ button:focus {
 }
 /* ===== ▲お知らせ機能スタイル ここまで▲ ===== */
 
-/* ===== ▼パズル練習タブ用スタイル ここから▼ ===== */
-.puzzle-container {
-    width: 100%;
-    max-width: 420px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-}
-
-#puzzle-info {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 4px 8px;
-    background: rgba(0,0,0,0.1);
-    border-radius: 8px;
-    color: #fffde7;
+/* ▼▼▼【ここから追加】▼▼▼ */
+/* 外部リンクボタン */
+#external-links-button {
+    background: linear-gradient(90deg, #e3f2fd 60%, #bbdefb 100%);
+    color: #1976d2;
+    border: 1.5px solid #90caf9;
+    border-radius: 7px;
+    font-size: 1em;
     font-weight: bold;
-}
-
-#combo-counter {
-    font-size: 1.2em;
-}
-
-#reset-board-button {
-    padding: 8px 16px;
-    font-size: 0.9em;
+    padding: 8px 18px;
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(33,150,243,0.10);
+    transition: background 0.2s, color 0.2s;
     width: auto;
     max-width: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+#external-links-button:hover, #external-links-button:focus {
+    background: linear-gradient(90deg, #bbdefb 60%, #90caf9 100%);
+    color: #0d47a1;
+    outline: none;
+}
+
+/* 外部リンクポップアップ内のリスト */
+#external-links-list {
+    margin-bottom: 20px;
+}
+#external-links-list h3 {
+    color: #90caf9;
+    border-bottom: 1px solid #1976d2;
+    padding-bottom: 6px;
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+#external-links-list ul {
+    list-style: none;
+    padding: 0;
     margin: 0;
 }
-
-#puzzle-board {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    width: 100%;
-    aspect-ratio: 6 / 5; /* 6x5の比率を維持 */
-    border: 2px solid #90caf9;
-    border-radius: 8px;
-    background: rgba(0,0,0,0.2);
-    touch-action: none; /* スマホでのドラッグ操作をスムーズにする */
+#external-links-list li {
+    margin-bottom: 8px;
 }
-
-.orb {
-    width: 100%;
-    height: 100%;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    cursor: grab;
-    user-select: none; /* ドラッグ中に画像が選択されるのを防ぐ */
+#external-links-list a {
+    color: #e3f2fd;
+    text-decoration: none;
+    display: block;
+    padding: 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.1);
+    transition: background 0.2s;
 }
-
-.orb.dragging {
-    opacity: 0.7;
-    cursor: grabbing;
-    transform: scale(1.1);
-    z-index: 10;
-    position: relative;
+#external-links-list a:hover {
+    background: rgba(255,255,255,0.2);
 }
-
-/* ドロップの種類ごとの画像 */
-.orb[data-orb="fire"]  { background-image: url('./orb_fire.png'); }
-.orb[data-orb="water"] { background-image: url('./orb_water.png'); }
-.orb[data-orb="wood"]  { background-image: url('./orb_wood.png'); }
-.orb[data-orb="light"] { background-image: url('./orb_light.png'); }
-.orb[data-orb="dark"]  { background-image: url('./orb_dark.png'); }
-.orb[data-orb="heart"] { background-image: url('./orb_heart.png'); }
-
-/* ===== ▲パズル練習タブ用スタイル ここまで▲ ===== */
+/* ▲▲▲【ここまで追加】▲▲▲ */
