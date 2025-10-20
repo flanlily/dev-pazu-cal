@@ -38,7 +38,6 @@
     font-weight: bold;
     font-size: 1.1em;
 }
-/* お知らせアイコン＋データ同期ボタン横並び・右上固定 */
 .notification-sync-bar {
     position: fixed;
     top: 15px;
@@ -50,35 +49,34 @@
     flex-wrap: nowrap;
 }
 
-/* ▼▼▼【ここから修正箇所】▼▼▼ */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    /* 背景色はデフォルトで設定し、JSで上書きする */
     background-color: #1565c0;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     color: #fff;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px; /* 画面端での余白確保 */
-
-    /* 背景画像のスタイルをJS側で設定するため、こちらからは削除 */
+    padding: 12px;
 }
-/* ▲▲▲【ここまで修正箇所】▲▲▲ */
 
 .container {
     max-width: 95vw;
     width: 100%;
     margin: 0 auto;
-    background: rgba(227, 242, 253, 0.7); /* 薄い青色+透過 */
+    background: rgba(227, 242, 253, 0.7);
     padding: 18px 8px 28px 8px;
     border-radius: 16px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.18);
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-sizing: border-box; /* 安定のため */
+    box-sizing: border-box;
 }
 
 h1, h2 {
@@ -88,7 +86,7 @@ h1, h2 {
     margin-bottom: 18px;
     width: 100%;
     text-align: center;
-    word-break: break-word; /* 長いタイトル対策 */
+    word-break: break-word;
 }
 
 p, .note {
@@ -107,7 +105,7 @@ p, .note {
     margin-bottom: 4px;
     font-weight: bold;
     color: #bbdefb;
-    word-break: break-word; /* ラベル長文対応 */
+    word-break: break-word;
 }
 
 .input-group select,
@@ -194,45 +192,22 @@ button:focus {
     font-weight: bold;
 }
 
-.note {
-    font-size: 0.92em;
-    color: #b3e5fc;
-    margin-top: 18px;
-    border-top: 1px solid #1976d2;
-    padding-top: 12px;
-    width: 100%;
-    max-width: 400px;
-    text-align: left;
-    background: none;
-    box-sizing: border-box;
-}
-
-/* 追加：タブボタン */
 .tabs {
     display: flex;
-    justify-content: center; /* 中央寄せ */
+    justify-content: center;
     gap: 8px;
-    flex-wrap: nowrap; /* 折り返さない */
-    overflow-x: hidden; /* 横スクロール禁止 */
-    max-width: 100vw;   /* 画面幅内に */
+    flex-wrap: nowrap;
+    overflow-x: hidden;
+    max-width: 100vw;
     box-sizing: border-box;
-    padding: 0 12px;    /* 左右少し余白 */
+    padding: 0 12px;
 }
 
 .tab-button {
     flex: 1 1 0;
     max-width: 200px;
-    background: linear-gradient(90deg, #e3f2fd 60%, #bbdefb 100%);
-    border: none;
-    border-radius: 6px;
-    color: #1976d2;
-    cursor: pointer;
-    font-weight: bold;
     padding: 10px 20px;
     font-size: 1rem;
-    transition: background 0.3s;
-    user-select: none;
-    white-space: nowrap;
 }
 
 .tab-button.active {
@@ -240,86 +215,30 @@ button:focus {
     box-shadow: 0 0 10px #90caf9;
 }
 
-.tab-button:focus {
-    outline: 2px solid #64b5f6;
-}
-
-/* タブコンテンツの表示・非表示 */
 .tab-content.hidden {
     display: none;
 }
 
-/* HP計算タブ内の見出し（L/F）のスタイル */
 #hp .input-group strong {
-    display: inline-block;
-    color: #bbdefb; /* 他のラベルと同じ薄い青色 */
+    color: #bbdefb;
     font-size: 1.1em;
-    font-weight: bold;
-    margin-bottom: 8px;
 }
 
-/* input-group内のsmallタグ（説明文）の色を調整 */
 .input-group small {
     color: #bbdefb;
     font-weight: normal;
-    display: block;
-    margin-top: 4px;
-    padding: 0 4px;
 }
 
-/* ------------------ スマホ用メディアクエリ ------------------ */
 @media (max-width: 600px) {
-    body {
-        padding: 8px;
-    }
-    .container {
-        padding: 16px 4vw 24px 4vw;
-        border-radius: 12px;
-        min-height: auto;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.14);
-    }
-    h1, h2 {
-        font-size: 1.3em;
-        padding-bottom: 6px;
-        margin-bottom: 14px;
-    }
-    .input-group,
-    .results-table,
-    .note {
-        max-width: 100%;
-        font-size: 1em;
-    }
-    .input-group select,
-    .input-group input[type="number"] {
-        font-size: 16px;
-        padding: 8px;
-    }
-    .results-table th,
-    .results-table td {
-        font-size: 0.9em;
-        padding: 6px 4px;
-    }
-    button {
-        font-size: 1.1em;
-        padding: 12px 0;
-        max-width: 100%;
-    }
-    .tabs {
-        gap: 6px;
-        padding: 0 6px; /* スマホは左右余白少し減らす */
-    }
-    .tab-button {
-        flex: 1 1 0;
-        max-width: 150px;
-        padding: 10px 8px;
-        font-size: 1rem;
-        white-space: nowrap;
-        user-select: none;
-    }
+    body { padding: 8px; }
+    .container { padding: 16px 4vw 24px 4vw; }
+    h1, h2 { font-size: 1.3em; }
+    .tab-button { padding: 10px 8px; }
+    .notification-sync-bar { top: 8px; right: 8px; gap: 4px; }
+    .notification-icon { width: 32px; height: 32px; min-width: 32px; }
+    #syncButton, #external-links-button { font-size: 0.92em; padding: 6px 7px; }
 }
 
-/* ===== ▼お知らせ機能スタイル ここから▼ ===== */
-/* お知らせアイコン */
 .notification-icon {
     width: 40px;
     height: 40px;
@@ -330,28 +249,19 @@ button:focus {
     justify-content: center;
     align-items: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    transition: transform 0.2s;
     position: relative;
     flex-shrink: 0;
 }
-.notification-icon:hover {
-    transform: scale(1.1);
-}
-.notification-icon::before {
-    content: '🔔';
-    font-size: 24px;
-}
-.notification-icon.active::before {
-    animation: bell-ring 1.5s ease-in-out infinite;
-}
+.notification-icon:hover { transform: scale(1.1); }
+.notification-icon::before { content: '🔔'; font-size: 24px; }
+.notification-icon.active::before { animation: bell-ring 1.5s ease-in-out infinite; }
 @keyframes bell-ring {
     0%, 50%, 100% { transform: rotate(0); }
     10%, 30% { transform: rotate(-15deg); }
     20%, 40% { transform: rotate(15deg); }
 }
 
-/* データ同期ボタン */
-#syncButton {
+#syncButton, #external-links-button {
     background: linear-gradient(90deg, #e3f2fd 60%, #bbdefb 100%);
     color: #1976d2;
     border: 1.5px solid #90caf9;
@@ -361,48 +271,23 @@ button:focus {
     padding: 8px 18px;
     margin: 0;
     box-shadow: 0 2px 8px rgba(33,150,243,0.10);
-    transition: background 0.2s, color 0.2s;
     width: auto;
     max-width: none;
-    cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    flex-shrink: 0;
 }
-#syncButton:hover, #syncButton:focus {
+#syncButton:hover, #syncButton:focus,
+#external-links-button:hover, #external-links-button:focus {
     background: linear-gradient(90deg, #bbdefb 60%, #90caf9 100%);
     color: #0d47a1;
-    outline: none;
 }
 
-@media (max-width: 600px) {
-    .notification-sync-bar {
-        top: 8px;
-        right: 8px;
-        gap: 4px;
-        flex-wrap: nowrap;
-    }
-    .notification-icon {
-        width: 32px;
-        height: 32px;
-        min-width: 32px;
-        min-height: 32px;
-    }
-    #syncButton {
-        font-size: 0.92em;
-        padding: 6px 7px;
-        min-width: 0;
-    }
-}
-
-
-/* 未読件数バッジ */
 .notification-badge {
     position: absolute;
     top: -5px;
     right: -5px;
-    background-color: #f44336; /* 赤色 */
+    background-color: #f44336;
     color: white;
     border-radius: 50%;
     padding: 2px 6px;
@@ -410,37 +295,24 @@ button:focus {
     font-weight: bold;
     border: 2px solid white;
 }
-.notification-badge.hidden {
-    display: none;
-}
+.notification-badge.hidden { display: none; }
 
-/* ポップアップ */
 .popup-wrapper {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 2000;
 }
-.popup-wrapper.hidden {
-    display: none;
-}
-
-/* 背景オーバーレイ */
+.popup-wrapper.hidden { display: none; }
 .popup-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background-color: rgba(0, 0, 0, 0.6);
 }
-
-/* ポップアップ本体 */
 .popup-content {
     position: relative;
     background: #1e3c78;
@@ -452,105 +324,19 @@ button:focus {
     max-width: 500px;
     max-height: 80vh;
     overflow-y: auto;
-    z-index: 2001;
     border: 1px solid #42a5f5;
 }
-.popup-content h2 {
-    margin-top: 0;
-    color: #bbdefb;
-    border-bottom: 1px solid #42a5f5;
-    padding-bottom: 10px;
+.popup-content h2 { margin-top: 0; color: #bbdefb; border-bottom: 1px solid #42a5f5; padding-bottom: 10px; }
+.popup-content button {
+    margin-top: 10px; /* 閉じるボタンにマージン追加 */
 }
 
-/* お知らせリスト */
-#notification-list {
-    margin-bottom: 20px;
-}
-.notification-item {
-    border-bottom: 1px solid #1976d2;
-    padding: 10px 0;
-}
-.notification-item:last-child {
-    border-bottom: none;
-}
-.notification-item p {
-    margin: 0;
-    line-height: 1.6;
-}
+#notification-list .notification-item { border-bottom: 1px solid #1976d2; padding: 10px 0; }
+#notification-list .notification-item:last-child { border-bottom: none; }
+#notification-list p { margin: 0; line-height: 1.6; }
 
-/* 閉じるボタン */
-#popupCloseButton {
-    width: 100%;
-    padding: 12px;
-    background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
-    border: none;
-    border-radius: 6px;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-#popupCloseButton:hover {
-    background: linear-gradient(90deg, #1565c0 60%, #64b5f6 100%);
-}
-/* ===== ▲お知らせ機能スタイル ここまで▲ ===== */
-
-/* ▼▼▼【ここから追加】▼▼▼ */
-/* 外部リンクボタン */
-#external-links-button {
-    background: linear-gradient(90deg, #e3f2fd 60%, #bbdefb 100%);
-    color: #1976d2;
-    border: 1.5px solid #90caf9;
-    border-radius: 7px;
-    font-size: 1em;
-    font-weight: bold;
-    padding: 8px 18px;
-    margin: 0;
-    box-shadow: 0 2px 8px rgba(33,150,243,0.10);
-    transition: background 0.2s, color 0.2s;
-    width: auto;
-    max-width: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    flex-shrink: 0;
-}
-#external-links-button:hover, #external-links-button:focus {
-    background: linear-gradient(90deg, #bbdefb 60%, #90caf9 100%);
-    color: #0d47a1;
-    outline: none;
-}
-
-/* 外部リンクポップアップ内のリスト */
-#external-links-list {
-    margin-bottom: 20px;
-}
-#external-links-list h3 {
-    color: #90caf9;
-    border-bottom: 1px solid #1976d2;
-    padding-bottom: 6px;
-    margin-top: 16px;
-    margin-bottom: 8px;
-}
-#external-links-list ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-#external-links-list li {
-    margin-bottom: 8px;
-}
-#external-links-list a {
-    color: #e3f2fd;
-    text-decoration: none;
-    display: block;
-    padding: 8px;
-    border-radius: 4px;
-    background: rgba(255,255,255,0.1);
-    transition: background 0.2s;
-}
-#external-links-list a:hover {
-    background: rgba(255,255,255,0.2);
-}
-/* ▲▲▲【ここまで追加】▲▲▲ */
+#external-links-list h3 { color: #90caf9; border-bottom: 1px solid #1976d2; padding-bottom: 6px; margin-top: 16px; margin-bottom: 8px; }
+#external-links-list ul { list-style: none; padding: 0; margin: 0; }
+#external-links-list li { margin-bottom: 8px; }
+#external-links-list a { color: #e3f2fd; text-decoration: none; display: block; padding: 8px; border-radius: 4px; background: rgba(255,255,255,0.1); transition: background 0.2s; }
+#external-links-list a:hover { background: rgba(255,255,255,0.2); }
