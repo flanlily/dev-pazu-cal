@@ -16,7 +16,7 @@
             <div class="notification-icon" id="notificationIcon">
                 <span class="notification-badge hidden" id="notificationBadge"></span>
             </div>
-            <button id="syncButton">🔄 データ同期</button>
+            <button id="external-links-button">🔗 外部ツールへ</button> <button id="syncButton">🔄 データ同期</button>
         </div>
 
         <div class="popup-wrapper hidden" id="notificationPopup">
@@ -27,6 +27,32 @@
                 <button id="popupCloseButton">閉じる</button>
             </div>
         </div>
+        
+        <div class="popup-wrapper hidden" id="links-popup">
+            <div class="popup-overlay" id="links-popup-overlay"></div>
+            <div class="popup-content">
+                <h2>外部リンク</h2>
+                <div id="external-links-list">
+                    <h3>sanbon氏制作ツール</h3>
+                    <ul>
+                        <li><a href="https://sanbon.me/jp/resources/awoken" target="_blank" rel="noopener noreferrer">覚醒スキル</a></li>
+                        <li><a href="https://sanbon.me/jp/resources/latent-awoken" target="_blank" rel="noopener noreferrer">潜在覚醒スキル</a></li>
+                        <li><a href="https://sanbon.me/jp/resources/badge" target="_blank" rel="noopener noreferrer">バッジ</a></li>
+                        <li><a href="https://sanbon.me/jp/resources/egg-simulator" target="_blank" rel="noopener noreferrer">ガチャシュミレーター</a></li>
+                        <li><a href="https://sanbon.me/jp/resources/probability-simulator" target="_blank" rel="noopener noreferrer">ガチャ確率計算機</a></li>
+                        <li><a href="https://sanbon.me/jp/resources/tier-maker" target="_blank" rel="noopener noreferrer">ティアメーカー</a></li>
+                        <li><a href="https://sanbon.me/jp/resources/puzzle" target="_blank" rel="noopener noreferrer">パズル練習</a></li>
+                    </ul>
+                    <h3>Twitter(旧X)</h3>
+                    <ul>
+                        <li><a href="https://x.com/pad_sexy?t=JXqjclHA2FCRcVjGmvkPBQ&s=09" target="_blank" rel="noopener noreferrer">X - ムラコ</a></li>
+                        <li><a href="https://x.com/DaikeYamamoto?t=HRze9R4A2QbOhrdvSE11qQ&s=09" target="_blank" rel="noopener noreferrer">X - ダイケ</a></li>
+                        <li><a href="https://x.com/sarna_flanlily?t=nq1Ipbl-oH5u_IngR6WDRQ&s=09" target="_blank" rel="noopener noreferrer">X - 自作ツール製作者</a></li>
+                    </ul>
+                </div>
+                <button id="links-popup-close-button">閉じる</button>
+            </div>
+        </div>
         <div class="container">
             <h1>PDC非対応計算ツール</h1>
 
@@ -34,26 +60,13 @@
                 <button class="tab-button active" data-tab="damage">割合計算</button>
                 <button class="tab-button" data-tab="exp">経験値計算</button>
                 <button class="tab-button" data-tab="hp">HP計算</button>
-                <button class="tab-button" data-tab="puzzle">パズル練習</button> </div>
-
-            <div class="tab-content hidden" id="hp">
-                </div>
-            <div class="tab-content" id="damage">
-                </div>
-            <div class="tab-content hidden" id="exp">
-                </div>
-
-            <div class="tab-content hidden" id="puzzle">
-                <div class="puzzle-container">
-                    <div id="puzzle-info">
-                        <span id="combo-counter">コンボ: 0</span>
-                        <button id="reset-board-button">リセット</button>
-                    </div>
-                    <div id="puzzle-board"></div>
-                </div>
             </div>
-            </div>
+
+            <div class="tab-content hidden" id="hp">...</div>
+            <div class="tab-content" id="damage">...</div>
+            <div class="tab-content hidden" id="exp">...</div>
+        </div>
 
         <script src="script.js" defer></script>
-        <script src="puzzle.js" defer></script> </body>
+    </body>
 </html>
