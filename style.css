@@ -494,3 +494,77 @@ button:focus {
     background: linear-gradient(90deg, #1565c0 60%, #64b5f6 100%);
 }
 /* ===== ▲お知らせ機能スタイル ここまで▲ ===== */
+
+/* ===== ▼パズル練習タブ用スタイル ここから▼ ===== */
+.puzzle-container {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+#puzzle-info {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 8px;
+    color: #fffde7;
+    font-weight: bold;
+}
+
+#combo-counter {
+    font-size: 1.2em;
+}
+
+#reset-board-button {
+    padding: 8px 16px;
+    font-size: 0.9em;
+    width: auto;
+    max-width: none;
+    margin: 0;
+}
+
+#puzzle-board {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    width: 100%;
+    aspect-ratio: 6 / 5; /* 6x5の比率を維持 */
+    border: 2px solid #90caf9;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.2);
+    touch-action: none; /* スマホでのドラッグ操作をスムーズにする */
+}
+
+.orb {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: grab;
+    user-select: none; /* ドラッグ中に画像が選択されるのを防ぐ */
+}
+
+.orb.dragging {
+    opacity: 0.7;
+    cursor: grabbing;
+    transform: scale(1.1);
+    z-index: 10;
+    position: relative;
+}
+
+/* ドロップの種類ごとの画像 */
+.orb[data-orb="fire"]  { background-image: url('./orb_fire.png'); }
+.orb[data-orb="water"] { background-image: url('./orb_water.png'); }
+.orb[data-orb="wood"]  { background-image: url('./orb_wood.png'); }
+.orb[data-orb="light"] { background-image: url('./orb_light.png'); }
+.orb[data-orb="dark"]  { background-image: url('./orb_dark.png'); }
+.orb[data-orb="heart"] { background-image: url('./orb_heart.png'); }
+
+/* ===== ▲パズル練習タブ用スタイル ここまで▲ ===== */
