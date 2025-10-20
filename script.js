@@ -313,6 +313,24 @@
             const popupCloseButton = document.getElementById('popupCloseButton');
             const notificationList = document.getElementById('notification-list');
 
+            // ▼▼▼【ここから追加】▼▼▼
+            // ----------- 外部リンクポップアップ関連 -----------
+            const linksPopupButton = document.getElementById('external-links-button');
+            const linksPopup = document.getElementById('links-popup');
+            const linksPopupOverlay = document.getElementById('links-popup-overlay');
+            const linksPopupCloseButton = document.getElementById('links-popup-close-button');
+
+            linksPopupButton.addEventListener('click', () => {
+                linksPopup.classList.remove('hidden');
+            });
+            linksPopupOverlay.addEventListener('click', () => {
+                linksPopup.classList.add('hidden');
+            });
+            linksPopupCloseButton.addEventListener('click', () => {
+                linksPopup.classList.add('hidden');
+            });
+            // ▲▲▲【ここまで追加】▲▲▲
+
             let latestNotificationDate = '';
 
             async function fetchAndShowNotifications() {
