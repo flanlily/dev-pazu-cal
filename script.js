@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const leaderMultiplier = document.getElementById('leaderMultiplier');
     const friendMultiplier = document.getElementById('friendMultiplier');
     const dungeonBonusCount = document.getElementById('dungeonBonusCount');
+    const padPassBonusSelect = document.getElementById('padPassBonus'); // パズパス要素取得
+    const adDoubleSelect = document.getElementById('adDouble');       // 広告視聴要素取得
+    const badgeBonusSelect = document.getElementById('badgeBonus');     // バッジ効果要素取得
     const expValueDisplay = document.getElementById('expValue');
 
     const tabs = document.querySelectorAll('.tab-button');
@@ -46,12 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchData(url) {
         try {
             const response = await fetch(`${url}?t=${new Date().getTime()}`);
-            if (!response.ok) throw new Error(`${url}の読み込みに失敗しました。`);
+            if (!response.ok) throw new Error(`${url}の読み込みに失敗しました。(${response.status})`);
             return await response.json();
         } catch (error) {
             console.error(error);
-            // alert(error.message); // エラー表示は一旦コメントアウト
-            return {};
+            // alert(error.message); // エラー表示は開発時以外コメントアウト推奨
+            return null; // エラー時はnullを返す
         }
     }
 
@@ -59,7 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
     async function setRandomBackground() {
         try {
             const backgroundImages = await fetchData('./media-list.json');
-            if (!backgroundImages || backgroundImages.length === 0) return;
+            // fetchDataがnullを返す可能性があるのでチェック
+            if (!backgroundImages || backgroundImages.length === 0) {
+                console.warn('背景画像リストが見つからないか空です。');
+                return;
+            }
             const randomIndex = Math.floor(Math.random() * backgroundImages.length);
             const selectedImage = backgroundImages[randomIndex];
             document.body.style.backgroundImage = `url('${selectedImage}')`;
@@ -79,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     tc.classList.toggle('hidden', tc.id !== targetId);
                 });
 
+                // 各タブの初回クリック時に初期化処理を実行
                 if (targetId === 'damage' && !damageTabInitialized) setupDamageTab();
                 if (targetId === 'exp' && !expTabInitialized) setupExpTab();
                 if (targetId === 'hp' && !hpTabInitialized) setupHpTab();
@@ -89,29 +97,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------- 各タブの初期化 -----------
     function setupDamageTab() {
         if (damageTabInitialized) return;
+        // イベントリスナー設定
         [dungeonSelect, floorSelect, inputA, inputB, inputC, inputL].forEach(el => {
             el.addEventListener('change', runDamageCalculation);
             if (el.tagName === 'INPUT') el.addEventListener('input', runDamageCalculation);
         });
+        // 初期計算実行
         runDamageCalculation();
         damageTabInitialized = true;
     }
 
     function setupExpTab() {
         if (expTabInitialized) return;
-        [expDungeon, expFloor, leaderMultiplier, friendMultiplier, document.getElementById('padPassBonus'), document.getElementById('adDouble'), document.getElementById('badgeBonus')].forEach(el => {
+        // イベントリスナー設定
+        [expDungeon, expFloor, leaderMultiplier, friendMultiplier, padPassBonusSelect, adDoubleSelect, badgeBonusSelect].forEach(el => {
             el.addEventListener('change', calculateExp);
         });
         dungeonBonusCount.addEventListener('input', calculateExp);
+        // 初期計算実行
         calculateExp();
         expTabInitialized = true;
     }
 
     function setupHpTab() {
         if (hpTabInitialized) return;
+        // イベントリスナー設定
         document.querySelectorAll('#hp input').forEach(input => {
             input.addEventListener('input', runHpCalculations);
         });
+        // 初期計算実行
         runHpCalculations();
         hpTabInitialized = true;
     }
@@ -120,9 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function runDamageCalculation() {
         const selectedDungeon = dungeonSelect.value;
         const selectedFloor = floorSelect.value;
-        resultsTableBody.innerHTML = '';
+        resultsTableBody.innerHTML = ''; // 計算結果をクリア
+
         if (!selectedDungeon || !selectedFloor) {
-            totalReductionRateDisplay.textContent = '';
+            totalReductionRateDisplay.textContent = ''; // 総軽減率表示もクリア
             return;
         }
 
@@ -139,12 +154,13 @@ document.addEventListener('DOMContentLoaded', () => {
         totalReductionRateDisplay.textContent = `総軽減率: ${((1 - totalReduce) * 100).toFixed(2)}%`;
 
         const damageData = damageDungeonData[selectedDungeon][selectedFloor];
+        // データが文字列の場合、数値の配列に変換。それ以外（配列など）ならそのまま使うか空配列に。
         const damageRatios = typeof damageData === 'string'
-             ? damageData.split(',').map(s => parseFloat(s.replace('%', '')))
-             : (Array.isArray(damageData) ? damageData : []);
+            ? damageData.split(',').map(s => parseFloat(s.replace('%', '')))
+            : (Array.isArray(damageData) ? damageData : []);
 
         damageRatios.forEach(ratio => {
-            if (isNaN(ratio)) return;
+            if (isNaN(ratio)) return; // 無効なデータはスキップ
             const finalDamagePercent = (ratio * totalReduce).toFixed(2);
             const canSurvive = finalDamagePercent < 100;
             const tr = document.createElement('tr');
@@ -160,11 +176,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateExp() {
         const dungeonName = expDungeon.value;
         const floorName = expFloor.value;
-        if (!dungeonName) { expValueDisplay.textContent = '-'; return; }
+
+        // ダンジョン未選択時は計算しない
+        if (!dungeonName) {
+            expValueDisplay.textContent = '-';
+            return;
+        }
 
         const floors = expData[dungeonName];
-        let baseExp = (typeof floors === 'object' && !Array.isArray(floors)) ? floors[floorName] : floors;
+        let baseExp;
+        // フロア選択が必要な場合（データがオブジェクト）とそうでない場合（データが数値）
+        if (typeof floors === 'object' && !Array.isArray(floors)) {
+            if (!floorName) { // フロアが未選択
+                expValueDisplay.textContent = '-';
+                return;
+            }
+            baseExp = floors[floorName];
+        } else {
+            baseExp = floors; // データ自体が経験値
+        }
 
+        // baseExpが取得できなかったり数値でない場合は計算しない
         if (typeof baseExp === 'undefined' || baseExp === null || isNaN(baseExp)) {
              expValueDisplay.textContent = '-';
              return;
@@ -174,9 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const friendMulti = parseFloat(friendMultiplier.value) || 1;
         const bonusCount = parseInt(dungeonBonusCount.value) || 0;
         const bonusMultiplier = Math.pow(1.02, bonusCount);
-        const padPassBonus = parseFloat(document.getElementById('padPassBonus').value) || 1;
-        const adDouble = parseFloat(document.getElementById('adDouble').value) || 1;
-        const badgeBonus = parseFloat(document.getElementById('badgeBonus').value) || 1;
+        const padPassBonus = parseFloat(padPassBonusSelect.value) || 1;
+        const adDouble = parseFloat(adDoubleSelect.value) || 1;
+        const badgeBonus = parseFloat(badgeBonusSelect.value) || 1;
 
         const baseWithMultipliers = baseExp * leaderMulti * friendMulti * bonusMultiplier;
         const withPadPass = baseWithMultipliers * padPassBonus;
@@ -188,11 +220,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function runHpCalculations() {
         // --- 1. パーティ合計HP計算 ---
-        const hps = [1,2,3,4,5,6].map(i => parseInt(document.getElementById(`hp${i}`).value) || 0);
+        const hps = [1,2,3,4,5,6].map(i => parseInt(document.getElementById(`hp${i}`)?.value) || 0);
         const totalBaseHp = hps.reduce((a, b) => a + b, 0);
-        const lMulti1 = parseFloat(document.getElementById('partyLHpMulti').value) || 1;
-        const fMulti1 = parseFloat(document.getElementById('partyFHpMulti').value) || 1;
-        const teamHpAwake1 = parseInt(document.getElementById('partyTeamHpAwakeCount').value) || 0;
+        const lMulti1 = parseFloat(document.getElementById('partyLHpMulti')?.value) || 1;
+        const fMulti1 = parseFloat(document.getElementById('partyFHpMulti')?.value) || 1;
+        const teamHpAwake1 = parseInt(document.getElementById('partyTeamHpAwakeCount')?.value) || 0;
         const teamHpAwakeMulti1 = 1 + 0.05 * teamHpAwake1;
         const avgMulti1 = (lMulti1 + fMulti1) / 2;
         const afterMulti1 = Math.floor(totalBaseHp * avgMulti1);
@@ -200,8 +232,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('totalHpResult').textContent = totalBaseHp > 0 ? `合計HP: ${finalTotalHp1.toLocaleString()}` : '-';
 
         // --- 2. チームHP覚醒で盛れているHP ---
-        const teamTotalHp2 = parseInt(document.getElementById('teamTotalHp').value) || 0;
-        const teamHpAwakeCount2 = parseInt(document.getElementById('teamHpAwakeCount').value) || 0;
+        const teamTotalHp2 = parseInt(document.getElementById('teamTotalHp')?.value) || 0;
+        const teamHpAwakeCount2 = parseInt(document.getElementById('teamHpAwakeCount')?.value) || 0;
         let awakeHpIncreaseText = '-';
         if (teamTotalHp2 > 0 && teamHpAwakeCount2 > 0) {
             const teamHpAwakeMulti2 = 1 + 0.05 * teamHpAwakeCount2;
@@ -212,11 +244,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('teamHpAwakeResult').textContent = awakeHpIncreaseText;
 
         // --- 3. 実質HP計算 ---
-        const lMulti3 = parseFloat(document.getElementById('actualLHpMulti').value) || 1;
-        const lReduce3 = parseFloat(document.getElementById('actualLReduce').value) || 0;
-        const fMulti3 = parseFloat(document.getElementById('actualFHpMulti').value) || 1;
-        const fReduce3 = parseFloat(document.getElementById('actualFReduce').value) || 0;
-        const skillReduce3 = parseFloat(document.getElementById('actualSkillReduce').value) || 0;
+        const lMulti3 = parseFloat(document.getElementById('actualLHpMulti')?.value) || 1;
+        const lReduce3 = parseFloat(document.getElementById('actualLReduce')?.value) || 0;
+        const fMulti3 = parseFloat(document.getElementById('actualFHpMulti')?.value) || 1;
+        const fReduce3 = parseFloat(document.getElementById('actualFReduce')?.value) || 0;
+        const skillReduce3 = parseFloat(document.getElementById('actualSkillReduce')?.value) || 0;
 
         const effectiveLRate = (1 - lReduce3 > 0) ? lMulti3 / (1 - lReduce3) : Infinity;
         const effectiveFRate = (1 - fReduce3 > 0) ? fMulti3 / (1 - fReduce3) : Infinity;
@@ -229,8 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('actualHpRateResult').textContent = (totalEffectiveHpRate !== Infinity) ? `総合実質HP倍率: ${totalEffectiveHpRate.toFixed(2)}倍` : '完全耐性';
 
         // --- 4. チームHP覚醒個数逆算 ---
-        const targetHp4 = parseInt(document.getElementById('targetHp').value) || 0;
-        const currentHp4 = parseInt(document.getElementById('currentHp').value) || 0;
+        const targetHp4 = parseInt(document.getElementById('targetHp')?.value) || 0;
+        const currentHp4 = parseInt(document.getElementById('currentHp')?.value) || 0;
         let neededAwakeText = '-';
         if (targetHp4 > 0 && currentHp4 > 0 && targetHp4 > currentHp4) {
             const neededMultiplier = targetHp4 / currentHp4;
@@ -271,15 +303,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 const names = await caches.keys();
                 await Promise.all(names.map(name => caches.delete(name)));
             }
-            location.reload(true);
+            // Service Workerの登録解除（必要であれば）
+            if ('serviceWorker' in navigator) {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    await registration.unregister();
+                }
+            }
+            location.reload(true); // 強制リロード
         });
     }
 
     async function fetchAndShowNotifications() {
         try {
             const notifications = await fetchData('./announcements.json');
-            notificationList.innerHTML = '';
-            if (notifications && notifications.length > 0) {
+             // fetchDataがnullを返す可能性があるのでチェック
+            if (!notifications || !Array.isArray(notifications)) {
+                notificationList.innerHTML = '<p>お知らせの読み込みに失敗しました。</p>';
+                return;
+            }
+            notificationList.innerHTML = ''; // リストをクリア
+            if (notifications.length > 0) {
                 latestNotificationDate = notifications[0].date;
                 const lastReadDate = localStorage.getItem('lastReadNotificationDate');
                 let unreadCount = 0;
@@ -297,8 +341,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (unreadCount > 0) notificationBadge.textContent = unreadCount;
             } else {
                 notificationList.innerHTML = '<p>新しいお知らせはありません。</p>';
+                notificationBadge.classList.add('hidden'); // お知らせがない場合もバッジを隠す
+                notificationIcon.classList.remove('active');
             }
         } catch (error) {
+            console.error('お知らせ取得エラー:', error);
             notificationList.innerHTML = '<p>お知らせの読み込みに失敗しました。</p>';
         }
     }
@@ -307,6 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function initializeAll() {
         await setRandomBackground();
 
+        // データの取得を待つ
         [damageDungeonData, expData] = await Promise.all([
             fetchData('./dungeonData.json'),
             fetchData('./pad_experience_data.json')
@@ -314,58 +362,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ▼▼▼【ここから修正】▼▼▼
         // プルダウンの初期化関数
-        function initializeSelect(selectElement, placeholderText) {
-            selectElement.innerHTML = `<option value="">${placeholderText}</option>`;
-            selectElement.disabled = true;
+        function initializeSelectWithOptions(selectElement, placeholderText, data) {
+            selectElement.innerHTML = `<option value="">${placeholderText}</option>`; // プレースホルダーを追加
+            if (data && typeof data === 'object') {
+                Object.keys(data).forEach(name => selectElement.add(new Option(name, name)));
+                selectElement.disabled = false; // データがあれば有効化
+            } else {
+                selectElement.disabled = true; // データがなければ無効化
+            }
         }
 
-        initializeSelect(dungeonSelect, 'ダンジョンを選択してください');
-        initializeSelect(floorSelect, 'フロアを選択してください');
-        initializeSelect(expDungeon, 'ダンジョンを選択してください');
-        initializeSelect(expFloor, 'フロアを選択してください');
+        // ダメージ計算タブのプルダウン初期化
+        initializeSelectWithOptions(dungeonSelect, 'ダンジョンを選択してください', damageDungeonData);
+        initializeSelect(floorSelect, 'フロアを選択してください'); // フロアはダンジョン選択後に有効化
+
+        // 経験値計算タブのプルダウン初期化
+        initializeSelectWithOptions(expDungeon, 'ダンジョンを選択してください', expData);
+        initializeSelect(expFloor, 'フロアを選択してください'); // フロアはダンジョン選択後に有効化
         // ▲▲▲【ここまで修正】▲▲▲
 
-        Object.keys(damageDungeonData).forEach(name => dungeonSelect.add(new Option(name, name)));
+        // ダンジョン選択時のイベントリスナー
         dungeonSelect.addEventListener('change', () => {
-            floorSelect.innerHTML = '<option value="">フロアを選択してください</option>';
-            const selected = dungeonSelect.value;
-            if (selected && damageDungeonData[selected]) {
-                Object.keys(damageDungeonData[selected]).forEach(name => floorSelect.add(new Option(name, name)));
+            const selectedDungeon = dungeonSelect.value;
+            initializeSelect(floorSelect, 'フロアを選択してください'); // フロアをリセット
+            if (selectedDungeon && damageDungeonData[selectedDungeon]) {
+                Object.keys(damageDungeonData[selectedDungeon]).forEach(name => floorSelect.add(new Option(name, name)));
                 floorSelect.disabled = false;
             } else {
                 floorSelect.disabled = true;
             }
-             runDamageCalculation();
+             runDamageCalculation(); // ダンジョン変更時も計算実行
         });
 
-        Object.keys(expData).forEach(name => expDungeon.add(new Option(name, name)));
         expDungeon.addEventListener('change', () => {
-            expFloor.innerHTML = '<option value="">フロアを選択してください</option>';
-            const selected = expDungeon.value;
-            if (selected && typeof expData[selected] === 'object' && !Array.isArray(expData[selected])) {
-                Object.keys(expData[selected]).forEach(name => expFloor.add(new Option(name, name)));
+            const selectedDungeon = expDungeon.value;
+            initializeSelect(expFloor, 'フロアを選択してください'); // フロアをリセット
+            if (selectedDungeon && typeof expData[selectedDungeon] === 'object' && !Array.isArray(expData[selectedDungeon])) {
+                Object.keys(expData[selectedDungeon]).forEach(name => expFloor.add(new Option(name, name)));
                 expFloor.disabled = false;
             } else {
-                expFloor.disabled = true;
+                expFloor.disabled = true; // フロア選択が不要な場合も無効化
             }
-            calculateExp();
+            calculateExp(); // ダンジョン変更時も計算実行
         });
 
-        // ▼▼▼【ここを追加】▼▼▼
-        // 初期状態ではダンジョンプルダウンを有効化
-        dungeonSelect.disabled = false;
-        expDungeon.disabled = false;
-        // ▲▲▲【ここまで追加】▲▲▲
+        // 補助的な初期化関数（プレースホルダーのみ設定）
+        function initializeSelect(selectElement, placeholderText) {
+             selectElement.innerHTML = `<option value="">${placeholderText}</option>`;
+             selectElement.disabled = true;
+        }
+
 
         setupTabs();
         setupPopupsAndSync();
 
+        // 前回表示していたタブを復元、またはデフォルトタブを表示
         const lastTab = localStorage.getItem('lastActiveTab');
         const initialTab = lastTab ? document.querySelector(`.tab-button[data-tab="${lastTab}"]`) : document.querySelector('.tab-button.active');
         if (initialTab) {
-            initialTab.click();
+            initialTab.click(); // 保存されたタブ、またはデフォルトのアクティブタブをクリックして初期化
         }
-        localStorage.removeItem('lastActiveTab');
+        localStorage.removeItem('lastActiveTab'); // 復元後は削除
 
         fetchAndShowNotifications();
     }
