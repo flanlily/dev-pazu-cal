@@ -32,12 +32,14 @@
     color: #1976d2;
     text-align: right;
 }
+/* ▼▼▼【ここを修正】▼▼▼ */
 .hp-result {
     margin-top: 8px;
-    color: #fffde7;
+    color: #bbdefb; /* 薄い青色に変更 */
     font-weight: bold;
     font-size: 1.1em;
 }
+/* ▲▲▲【ここまで修正】▲▲▲ */
 .notification-sync-bar {
     position: fixed;
     top: 15px;
@@ -208,7 +210,7 @@ button:focus {
     max-width: 200px;
     padding: 10px 20px;
     font-size: 1rem;
-    white-space: nowrap; /* ◀️ この行で改行を防ぎます */
+    white-space: nowrap; /* 改行を防ぐ */
 }
 
 .tab-button.active {
@@ -329,7 +331,7 @@ button:focus {
 }
 .popup-content h2 { margin-top: 0; color: #bbdefb; border-bottom: 1px solid #42a5f5; padding-bottom: 10px; }
 .popup-content button {
-    margin-top: 10px;
+    margin-top: 10px; /* 閉じるボタンにマージン追加 */
 }
 
 #notification-list .notification-item { border-bottom: 1px solid #1976d2; padding: 10px 0; }
