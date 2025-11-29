@@ -16,9 +16,9 @@
             <div class="notification-icon" id="notificationIcon">
                 <span class="notification-badge hidden" id="notificationBadge"></span>
             </div>
-            <button id="external-links-button">🔗 外部ツールへ</button>
             <button id="syncButton">🔄 データ同期</button>
         </div>
+
         <div class="popup-wrapper hidden" id="notificationPopup">
             <div class="popup-overlay" id="popupOverlay"></div>
             <div class="popup-content">
@@ -27,33 +27,6 @@
                 <button id="popupCloseButton">閉じる</button>
             </div>
         </div>
-        
-        <div class="popup-wrapper hidden" id="links-popup">
-            <div class="popup-overlay" id="links-popup-overlay"></div>
-            <div class="popup-content">
-                <h2>外部リンク</h2>
-                <div id="external-links-list">
-                    <h3>sanbon氏制作ツール</h3>
-                    <ul>
-                        <li><a href="https://sanbon.me/jp/resources/awoken" target="_blank" rel="noopener noreferrer">覚醒スキル</a></li>
-                        <li><a href="https://sanbon.me/jp/resources/latent-awoken" target="_blank" rel="noopener noreferrer">潜在覚醒スキル</a></li>
-                        <li><a href="https://sanbon.me/jp/resources/badge" target="_blank" rel="noopener noreferrer">バッジ</a></li>
-                        <li><a href="https://sanbon.me/jp/resources/egg-simulator" target="_blank" rel="noopener noreferrer">ガチャシュミレーター</a></li>
-                        <li><a href="https://sanbon.me/jp/resources/probability-simulator" target="_blank" rel="noopener noreferrer">ガチャ確率計算機</a></li>
-                        <li><a href="https://sanbon.me/jp/resources/tier-maker" target="_blank" rel="noopener noreferrer">ティアメーカー</a></li>
-                        <li><a href="https://sanbon.me/jp/resources/puzzle" target="_blank" rel="noopener noreferrer">パズル練習</a></li>
-                    </ul>
-                    <h3>Twitter(旧X)</h3>
-                    <ul>
-                        <li><a href="https://x.com/pad_sexy?t=JXqjclHA2FCRcVjGmvkPBQ&s=09" target="_blank" rel="noopener noreferrer">Twitter - ムラコ</a></li>
-                        <li><a href="https://x.com/DaikeYamamoto?t=HRze9R4A2QbOhrdvSE11qQ&s=09" target="_blank" rel="noopener noreferrer">Twitter - ダイケ</a></li>
-                        <li><a href="https://x.com/sarna_flanlily?t=nq1Ipbl-oH5u_IngR6WDRQ&s=09" target="_blank" rel="noopener noreferrer">Twitter - 自作ツール製作者</a></li>
-                    </ul>
-                </div>
-                <button id="links-popup-close-button">閉じる</button>
-            </div>
-        </div>
-
         <div class="container">
             <h1>PDC非対応計算ツール</h1>
 
@@ -189,6 +162,7 @@
                     </table>
                 </div>
             </div>
+
             <div class="tab-content hidden" id="exp">
                 <div class="input-group">
                     <label for="expDungeon">ダンジョン選択:</label>
@@ -233,8 +207,9 @@
                 <div class="input-group">
                     <label for="dungeonBonusCount">ダンジョンボーナス覚醒数:</label>
                     <input id="dungeonBonusCount" min="0" step="1" type="number" value="0" />
-                    <small>1つにつき2%加算され、累乗されます</small>
+                    <small>1つにつき2%加算（例: 3個なら1.06倍）</small>
                 </div>
+                
                 <div class="input-group">
                     <label for="padPassBonus">パズパスボーナス</label>
                     <select id="padPassBonus">
@@ -258,6 +233,9 @@
                 </div>
                 <div id="expResult">
                     <h2>経験値結果</h2>
+                    <p style="font-size:0.95em;color:#bbdefb;margin-bottom:8px;">
+                        計算順：リーダー経験値 → 助っ人経験値 → ダンジョンボーナス → パズパス → バッジ効果 → 広告2倍
+                    </p>
                     <p id="expValue">-</p>
                 </div>
             </div>
