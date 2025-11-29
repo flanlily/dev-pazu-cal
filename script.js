@@ -202,21 +202,24 @@ document.addEventListener('DOMContentLoaded', () => {
              return;
         }
 
-        const leaderMulti = parseFloat(leaderMultiplier.value) || 1;
-        const friendMulti = parseFloat(friendMultiplier.value) || 1;
+        const leaderMulti = parseFloat(leaderMultiplier.value);
+        const friendMulti = parseFloat(friendMultiplier.value);
         const bonusCount = parseInt(dungeonBonusCount.value) || 0;
-        const bonusMultiplier = Math.pow(1.02, bonusCount);
-        const padPassBonus = parseFloat(padPassBonusSelect.value) || 1;
-        const adDouble = parseFloat(adDoubleSelect.value) || 1;
-        const badgeBonus = parseFloat(badgeBonusSelect.value) || 1;
+        const bonusMultiplier = 1 + 0.02 * bonusCount;
+        const padPassBonus = padPassBonusSelect ? parseFloat(padPassBonusSelect.value) || 1 : 1;
+        const badgeBonus = badgeBonusSelect ? parseFloat(badgeBonusSelect.value) || 1 : 1;
+        const adDouble = adDoubleSelect ? parseFloat(adDoubleSelect.value) || 1 : 1;
 
-        const baseWithMultipliers = baseExp * leaderMulti * friendMulti * bonusMultiplier;
-        const withPadPass = baseWithMultipliers * padPassBonus;
-        const withAd = withPadPass * adDouble;
-        const totalExp = (badgeBonus === 1.1) ? (withAd * 1.1) : withAd;
+        // 計算順: リーダー→助っ人→ダンジョンボーナス→パズパス→バッジ→広告2倍
+        let result = baseExp;
+        result *= leaderMulti; // リーダー経験値倍率
+        result *= friendMulti; // 助っ人経験値倍率
+        result *= bonusMultiplier; // ダンジョンボーナス覚醒
+        result *= padPassBonus; // パズパスボーナス
+        result *= badgeBonus; // バッジ効果
+        result *= adDouble; // 広告2倍
 
-        expValueDisplay.textContent = `獲得経験値: ${Math.round(totalExp).toLocaleString()}`;
-    }
+        expValueDisplay.textContent = `獲得経験値: ${Math.round(result).toLocaleString()}`;
 
     function runHpCalculations() {
         // --- 1. パーティ合計HP計算 ---
