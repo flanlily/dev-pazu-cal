@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const popupCloseButton = document.getElementById('popupCloseButton');
     const notificationList = document.getElementById('notification-list');
 
+    // 存在しない場合もあるのでnull許容で取得
     const linksPopupButton = document.getElementById('external-links-button');
     const linksPopup = document.getElementById('links-popup');
     const linksPopupOverlay = document.getElementById('links-popup-overlay');
@@ -290,9 +291,16 @@ document.addEventListener('DOMContentLoaded', () => {
         popupOverlay.addEventListener('click', () => notificationPopup.classList.add('hidden'));
         popupCloseButton.addEventListener('click', () => notificationPopup.classList.add('hidden'));
 
-        linksPopupButton.addEventListener('click', () => linksPopup.classList.remove('hidden'));
-        linksPopupOverlay.addEventListener('click', () => linksPopup.classList.add('hidden'));
-        linksPopupCloseButton.addEventListener('click', () => linksPopup.classList.add('hidden'));
+        // 存在する場合のみイベント登録
+        if (linksPopupButton && linksPopup) {
+            linksPopupButton.addEventListener('click', () => linksPopup.classList.remove('hidden'));
+        }
+        if (linksPopupOverlay && linksPopup) {
+            linksPopupOverlay.addEventListener('click', () => linksPopup.classList.add('hidden'));
+        }
+        if (linksPopupCloseButton && linksPopup) {
+            linksPopupCloseButton.addEventListener('click', () => linksPopup.classList.add('hidden'));
+        }
 
         syncButton.addEventListener('click', async () => {
             syncButton.disabled = true;
