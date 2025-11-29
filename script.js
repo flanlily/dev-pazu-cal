@@ -221,62 +221,64 @@ document.addEventListener('DOMContentLoaded', () => {
         result *= adDouble; // 広告2倍
 
         expValueDisplay.textContent = `獲得経験値: ${Math.round(result).toLocaleString()}`;
-
-    function runHpCalculations() {
-        // --- 1. パーティ合計HP計算 ---
-        const hps = [1,2,3,4,5,6].map(i => parseInt(document.getElementById(`hp${i}`)?.value) || 0);
-        const totalBaseHp = hps.reduce((a, b) => a + b, 0);
-        const lMulti1 = parseFloat(document.getElementById('partyLHpMulti')?.value) || 1;
-        const fMulti1 = parseFloat(document.getElementById('partyFHpMulti')?.value) || 1;
-        const teamHpAwake1 = parseInt(document.getElementById('partyTeamHpAwakeCount')?.value) || 0;
-        const teamHpAwakeMulti1 = 1 + 0.05 * teamHpAwake1;
-        const avgMulti1 = (lMulti1 + fMulti1) / 2;
-        const afterMulti1 = Math.floor(totalBaseHp * avgMulti1);
-        const finalTotalHp1 = Math.floor(afterMulti1 * teamHpAwakeMulti1);
-        document.getElementById('totalHpResult').textContent = totalBaseHp > 0 ? `合計HP: ${finalTotalHp1.toLocaleString()}` : '-';
-
-        // --- 2. チームHP覚醒で盛れているHP ---
-        const teamTotalHp2 = parseInt(document.getElementById('teamTotalHp')?.value) || 0;
-        const teamHpAwakeCount2 = parseInt(document.getElementById('teamHpAwakeCount')?.value) || 0;
-        let awakeHpIncreaseText = '-';
-        if (teamTotalHp2 > 0 && teamHpAwakeCount2 > 0) {
-            const teamHpAwakeMulti2 = 1 + 0.05 * teamHpAwakeCount2;
-            const hpBeforeAwake = teamTotalHp2 / teamHpAwakeMulti2;
-            const increaseAmount = Math.round(teamTotalHp2 - hpBeforeAwake);
-            awakeHpIncreaseText = `覚醒による増加分: ${increaseAmount.toLocaleString()} HP`;
-        }
-        document.getElementById('teamHpAwakeResult').textContent = awakeHpIncreaseText;
-
-        // --- 3. 実質HP計算 ---
-        const lMulti3 = parseFloat(document.getElementById('actualLHpMulti')?.value) || 1;
-        const lReduce3 = parseFloat(document.getElementById('actualLReduce')?.value) || 0;
-        const fMulti3 = parseFloat(document.getElementById('actualFHpMulti')?.value) || 1;
-        const fReduce3 = parseFloat(document.getElementById('actualFReduce')?.value) || 0;
-        const skillReduce3 = parseFloat(document.getElementById('actualSkillReduce')?.value) || 0;
-
-        const effectiveLRate = (1 - lReduce3 > 0) ? lMulti3 / (1 - lReduce3) : Infinity;
-        const effectiveFRate = (1 - fReduce3 > 0) ? fMulti3 / (1 - fReduce3) : Infinity;
-        const totalEffectiveHpRate = (1 - lReduce3 > 0 && 1 - fReduce3 > 0 && 1 - skillReduce3 > 0)
-            ? (lMulti3 * fMulti3) / ((1 - lReduce3) * (1 - fReduce3) * (1 - skillReduce3))
-            : Infinity;
-
-        document.getElementById('actualLHpResult').textContent = (effectiveLRate !== Infinity) ? `リーダー実質HP: ${effectiveLRate.toFixed(2)}倍` : '軽減100%';
-        document.getElementById('actualFHpResult').textContent = (effectiveFRate !== Infinity) ? `フレンド実質HP: ${effectiveFRate.toFixed(2)}倍` : '軽減100%';
-        document.getElementById('actualHpRateResult').textContent = (totalEffectiveHpRate !== Infinity) ? `総合実質HP倍率: ${totalEffectiveHpRate.toFixed(2)}倍` : '完全耐性';
-
-        // --- 4. チームHP覚醒個数逆算 ---
-        const targetHp4 = parseInt(document.getElementById('targetHp')?.value) || 0;
-        const currentHp4 = parseInt(document.getElementById('currentHp')?.value) || 0;
-        let neededAwakeText = '-';
-        if (targetHp4 > 0 && currentHp4 > 0 && targetHp4 > currentHp4) {
-            const neededMultiplier = targetHp4 / currentHp4;
-            const neededAwakeCount = Math.ceil((neededMultiplier - 1) / 0.05);
-            neededAwakeText = `目標達成に必要な覚醒数: 約 ${neededAwakeCount} 個`;
-        } else if (targetHp4 > 0 && currentHp4 > 0 && targetHp4 <= currentHp4) {
-            neededAwakeText = '目標HPに到達済みか、上回っています';
-        }
-        document.getElementById('neededAwakeResult').textContent = neededAwakeText;
     }
+
+// ----------- HP計算処理 -----------
+function runHpCalculations() {
+    // --- 1. パーティ合計HP計算 ---
+    const hps = [1,2,3,4,5,6].map(i => parseInt(document.getElementById(`hp${i}`)?.value) || 0);
+    const totalBaseHp = hps.reduce((a, b) => a + b, 0);
+    const lMulti1 = parseFloat(document.getElementById('partyLHpMulti')?.value) || 1;
+    const fMulti1 = parseFloat(document.getElementById('partyFHpMulti')?.value) || 1;
+    const teamHpAwake1 = parseInt(document.getElementById('partyTeamHpAwakeCount')?.value) || 0;
+    const teamHpAwakeMulti1 = 1 + 0.05 * teamHpAwake1;
+    const avgMulti1 = (lMulti1 + fMulti1) / 2;
+    const afterMulti1 = Math.floor(totalBaseHp * avgMulti1);
+    const finalTotalHp1 = Math.floor(afterMulti1 * teamHpAwakeMulti1);
+    document.getElementById('totalHpResult').textContent = totalBaseHp > 0 ? `合計HP: ${finalTotalHp1.toLocaleString()}` : '-';
+
+    // --- 2. チームHP覚醒で盛れているHP ---
+    const teamTotalHp2 = parseInt(document.getElementById('teamTotalHp')?.value) || 0;
+    const teamHpAwakeCount2 = parseInt(document.getElementById('teamHpAwakeCount')?.value) || 0;
+    let awakeHpIncreaseText = '-';
+    if (teamTotalHp2 > 0 && teamHpAwakeCount2 > 0) {
+        const teamHpAwakeMulti2 = 1 + 0.05 * teamHpAwakeCount2;
+        const hpBeforeAwake = teamTotalHp2 / teamHpAwakeMulti2;
+        const increaseAmount = Math.round(teamTotalHp2 - hpBeforeAwake);
+        awakeHpIncreaseText = `覚醒による増加分: ${increaseAmount.toLocaleString()} HP`;
+    }
+    document.getElementById('teamHpAwakeResult').textContent = awakeHpIncreaseText;
+
+    // --- 3. 実質HP計算 ---
+    const lMulti3 = parseFloat(document.getElementById('actualLHpMulti')?.value) || 1;
+    const lReduce3 = parseFloat(document.getElementById('actualLReduce')?.value) || 0;
+    const fMulti3 = parseFloat(document.getElementById('actualFHpMulti')?.value) || 1;
+    const fReduce3 = parseFloat(document.getElementById('actualFReduce')?.value) || 0;
+    const skillReduce3 = parseFloat(document.getElementById('actualSkillReduce')?.value) || 0;
+
+    const effectiveLRate = (1 - lReduce3 > 0) ? lMulti3 / (1 - lReduce3) : Infinity;
+    const effectiveFRate = (1 - fReduce3 > 0) ? fMulti3 / (1 - fReduce3) : Infinity;
+    const totalEffectiveHpRate = (1 - lReduce3 > 0 && 1 - fReduce3 > 0 && 1 - skillReduce3 > 0)
+        ? (lMulti3 * fMulti3) / ((1 - lReduce3) * (1 - fReduce3) * (1 - skillReduce3))
+        : Infinity;
+
+    document.getElementById('actualLHpResult').textContent = (effectiveLRate !== Infinity) ? `リーダー実質HP: ${effectiveLRate.toFixed(2)}倍` : '軽減100%';
+    document.getElementById('actualFHpResult').textContent = (effectiveFRate !== Infinity) ? `フレンド実質HP: ${effectiveFRate.toFixed(2)}倍` : '軽減100%';
+    document.getElementById('actualHpRateResult').textContent = (totalEffectiveHpRate !== Infinity) ? `総合実質HP倍率: ${totalEffectiveHpRate.toFixed(2)}倍` : '完全耐性';
+
+    // --- 4. チームHP覚醒個数逆算 ---
+    const targetHp4 = parseInt(document.getElementById('targetHp')?.value) || 0;
+    const currentHp4 = parseInt(document.getElementById('currentHp')?.value) || 0;
+    let neededAwakeText = '-';
+    if (targetHp4 > 0 && currentHp4 > 0 && targetHp4 > currentHp4) {
+        const neededMultiplier = targetHp4 / currentHp4;
+        const neededAwakeCount = Math.ceil((neededMultiplier - 1) / 0.05);
+        neededAwakeText = `目標達成に必要な覚醒数: 約 ${neededAwakeCount} 個`;
+    } else if (targetHp4 > 0 && currentHp4 > 0 && targetHp4 <= currentHp4) {
+        neededAwakeText = '目標HPに到達済みか、上回っています';
+    }
+    document.getElementById('neededAwakeResult').textContent = neededAwakeText;
+}
 
     // ----------- ポップアップと同期ボタンの処理 -----------
     function setupPopupsAndSync() {
@@ -429,9 +431,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 前回表示していたタブを復元、またはデフォルトタブを表示
         const lastTab = localStorage.getItem('lastActiveTab');
-        const initialTab = lastTab ? document.querySelector(`.tab-button[data-tab="${lastTab}"]`) : document.querySelector('.tab-button.active');
+        let initialTab = null;
+        if (lastTab) {
+            initialTab = document.querySelector(`.tab-button[data-tab="${lastTab}"]`);
+        }
+        if (!initialTab) {
+            // .tab-buttonのうち最初のものをデフォルトに
+            initialTab = document.querySelector('.tab-button');
+        }
+        // すべてのタブ内容を一旦非表示
+        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
+        // 初期タブをアクティブ化
         if (initialTab) {
-            initialTab.click(); // 保存されたタブ、またはデフォルトのアクティブタブをクリックして初期化
+            document.querySelectorAll('.tab-button').forEach(t => t.classList.remove('active'));
+            initialTab.classList.add('active');
+            const targetId = initialTab.dataset.tab;
+            const showContent = document.getElementById(targetId);
+            if (showContent) showContent.classList.remove('hidden');
+            // 初期化も実行
+            if (targetId === 'damage' && !damageTabInitialized) setupDamageTab();
+            if (targetId === 'exp' && !expTabInitialized) setupExpTab();
+            if (targetId === 'hp' && !hpTabInitialized) setupHpTab();
         }
         localStorage.removeItem('lastActiveTab'); // 復元後は削除
 
