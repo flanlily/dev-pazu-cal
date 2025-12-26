@@ -65,6 +65,10 @@
 }
 
 /* ▼▼▼【ここから修正箇所】▼▼▼ */
+/* 背景の全幅表示対応: html/body の高さを確保し、bodyの背景表示をcoverで行う */
+html, body {
+    height: 100%;
+}
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
@@ -76,6 +80,13 @@ body {
     align-items: center;
     justify-content: center;
     padding: 12px; /* 画面端での余白確保 */
+
+    /* 背景画像の表示をスマホ画面に合わせるための指定 */
+    background-repeat: no-repeat;
+    background-size: cover;         /* 画像を縦横比を保って画面全体に表示 */
+    -webkit-background-size: cover; /* 古い iOS 対応 */
+    background-position: center top;/* 必要に応じ center center に変更可能 */
+    background-attachment: scroll;  /* mobile で fixed は不安定なため scroll を推奨 */
 
     /* 背景画像のスタイルをJS側で設定するため、こちらからは削除 */
 }
@@ -457,7 +468,7 @@ p, .note {
     background-color: rgba(0, 0, 0, 0.6);
 }
 
-/* ポップアップ本体 */
+/* ポップアップ本体（既存） */
 .popup-content {
     position: relative;
     background: #1e3c78;
@@ -479,35 +490,122 @@ p, .note {
     padding-bottom: 10px;
 }
 
-/* お知らせリスト */
-#notification-list {
-    margin-bottom: 20px;
-}
-.notification-item {
-    border-bottom: 1px solid #1976d2;
-    padding: 10px 0;
-}
-.notification-item:last-child {
-    border-bottom: none;
-}
-.notification-item p {
-    margin: 0;
-    line-height: 1.6;
+/* ===== ▲お知らせ機能スタイル ここまで▲ ===== */
+
+/* ===== ▼外部リンクポップアップ（links-popup）専用スタイル ここから▼ ===== */
+/* 画像のような見た目に近づけるため、links-popup に特化したスタイルを追加 */
+#links-popup .popup-content {
+    background: linear-gradient(180deg, #0f3a6e 0%, #15355f 100%);
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    width: 92%;
+    max-width: 420px; /* 画像と近い幅 */
+    box-shadow: 0 8px 30px rgba(8,24,60,0.6);
+    border: 1px solid rgba(255,255,255,0.06);
 }
 
-/* 閉じるボタン */
-#popupCloseButton {
+/* ポップアップ見出しを中央で大きく */
+#links-popup .popup-content h2 {
+    text-align: center;
+    font-size: 1.35em;
+    margin: 6px 0 12px;
+    color: #e8f5ff;
+    font-weight: 700;
+}
+
+/* セクション見出し */
+#links-popup .section-title {
+    color: #bfe1ff;
+    font-weight: 700;
+    margin: 8px 0 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+/* リスト本体 */
+#links-popup-list {
+    margin-top: 10px;
+    margin-bottom: 6px;
+}
+
+/* リンクをボタン風に */
+#links-popup-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+#links-popup-list ul li {
+    margin: 8px 0;
+}
+#links-popup-list ul li a {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    color: #e8f5ff;
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: inset 0 -1px rgba(255,255,255,0.02);
+    transition: background 0.12s ease, transform 0.06s ease;
+}
+#links-popup-list ul li a:hover {
+    background: rgba(255,255,255,0.07);
+    transform: translateY(-1px);
+}
+#links-popup-list ul li a:active {
+    transform: translateY(0);
+}
+
+/* リンクボタン内の文字を左寄せに（画像と同様） */
+#links-popup-list ul li a {
+    text-align: left;
+}
+
+/* 閉じるボタン（links-popup）を大きく見せる */
+#links-popup-close-button {
     width: 100%;
     padding: 12px;
-    background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
+    margin-top: 10px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #e3f2fd 10%, #bbdefb 100%);
+    color: #0d47a1;
+    font-weight: 800;
+    font-size: 1.03em;
     border: none;
-    border-radius: 6px;
-    color: white;
-    font-size: 16px;
     cursor: pointer;
-    transition: background 0.2s;
+    box-shadow: 0 4px 12px rgba(6,40,80,0.24);
 }
-#popupCloseButton:hover {
-    background: linear-gradient(90deg, #1565c0 60%, #64b5f6 100%);
+#links-popup-close-button:hover {
+    background: linear-gradient(90deg, #d0e9ff 10%, #9fc6f4 100%);
 }
-/* ===== ▲お知らせ機能スタイル ここまで▲ ===== */
+
+/* small の補助文（リンク下） */
+#links-popup .popup-content p.small-note {
+    color: #bcdff8;
+    font-size: 0.9em;
+    margin: 6px 0 0;
+}
+
+/* スマホで見た目を整える */
+@media (max-width: 480px) {
+    #links-popup .popup-content {
+        max-width: 360px;
+        padding: 14px;
+        border-radius: 12px;
+    }
+    #links-popup .popup-content h2 {
+        font-size: 1.2em;
+    }
+    #links-popup-list ul li a {
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 0.98em;
+    }
+    #links-popup-close-button {
+        padding: 10px;
+        font-size: 1em;
+    }
+}
+/* ===== ▲外部リンクポップアップ（links-popup）専用スタイル ここまで▲ ===== */
