@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const skillReduce = 1 - valC;
         const lReduce = 1 - 0.05 * valL;
         const totalReduce = Math.max(0, leaderReduce * friendReduce * skillReduce * lReduce);
-        totalReductionRateDisplay.textContent = `総軽減率: ${((1 - totalReduce) * 100).toFixed(2)}%`;
+        totalReductionRateDisplay.textContent = `総軽減率: ${((1 - totalReduce) * 100).toFixed(02)}%`;
 
         const damageData = damageDungeonData[selectedDungeon][selectedFloor];
         // データが文字列の場合、数値の配列に変換。それ以外（配列など）ならそのまま使うか空配列に。
@@ -172,6 +172,15 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             resultsTableBody.appendChild(tr);
         });
+    }
+
+    // ユーティリティ: 文字列から数値を安全に取り出す（カンマ・単位などを除去）
+    function parseNumberFromString(value, fallback = NaN) {
+        if (value === null || value === undefined) return fallback;
+        if (typeof value === 'number') return value;
+        const s = String(value).replace(/,/g, '').replace(/[^\d.\-]/g, '');
+        const n = parseFloat(s);
+        return isNaN(n) ? fallback : n;
     }
 
     function calculateExp() {
@@ -198,18 +207,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // baseExpが取得できなかったり数値でない場合は計算しない
-        if (typeof baseExp === 'undefined' || baseExp === null || isNaN(baseExp)) {
+        if (typeof baseExp === 'undefined' || baseExp === null) {
              expValueDisplay.textContent = '-';
              return;
         }
 
-        const leaderMulti = parseFloat(leaderMultiplier.value);
-        const friendMulti = parseFloat(friendMultiplier.value);
-        const bonusCount = parseInt(dungeonBonusCount.value) || 0;
+        // baseExpが文字列の場合、数値に変換（例："1,234" や "1234exp" などに対応）
+        baseExp = parseNumberFromString(baseExp, NaN);
+        if (isNaN(baseExp)) {
+            expValueDisplay.textContent = '-';
+            return;
+        }
+
+        // 各倍率を安全に取得（selectのoptionが誤って説明文をvalueに持っていた場合に備える）
+        const leaderMulti = parseNumberFromString(leaderMultiplier?.value, 1);
+        const friendMulti = parseNumberFromString(friendMultiplier?.value, 1);
+        const bonusCount = parseInt(dungeonBonusCount?.value) || 0;
         const bonusMultiplier = 1 + 0.02 * bonusCount;
-        const padPassBonus = padPassBonusSelect ? parseFloat(padPassBonusSelect.value) || 1 : 1;
-        const badgeBonus = badgeBonusSelect ? parseFloat(badgeBonusSelect.value) || 1 : 1;
-        const adDouble = adDoubleSelect ? parseFloat(adDoubleSelect.value) || 1 : 1;
+        const padPassBonus = padPassBonusSelect ? parseNumberFromString(padPassBonusSelect.value, 1) : 1;
+        const badgeBonus = badgeBonusSelect ? parseNumberFromString(badgeBonusSelect.value, 1) : 1;
+        const adDouble = adDoubleSelect ? parseNumberFromString(adDoubleSelect.value, 1) : 1;
 
         // 計算順: リーダー→助っ人→ダンジョンボーナス→パズパス→バッジ→広告2倍
         let result = baseExp;
@@ -220,7 +237,12 @@ document.addEventListener('DOMContentLoaded', () => {
         result *= badgeBonus; // バッジ効果
         result *= adDouble; // 広告2倍
 
-        expValueDisplay.textContent = `獲得経験値: ${Math.round(result).toLocaleString()}`;
+        // 結果が数値でない/無限大なら '-' を表示
+        if (typeof result !== 'number' || isNaN(result) || !isFinite(result)) {
+            expValueDisplay.textContent = '-';
+        } else {
+            expValueDisplay.textContent = `獲得経験値: ${Math.round(result).toLocaleString()}`;
+        }
     }
 
 // ----------- HP計算処理 -----------
