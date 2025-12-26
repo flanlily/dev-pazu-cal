@@ -144,25 +144,32 @@ p, .note {
     border-color: #1976d2;
 }
 
-button {
+/* 共通ボタンスタイル（同期ボタンと外部リンクボタンを揃えるため） */
+#syncButton,
+#external-links-button {
     background: linear-gradient(90deg, #e3f2fd 60%, #bbdefb 100%);
     color: #1976d2;
-    padding: 13px 0;
-    border: none;
+    border: 1.5px solid #90caf9;
     border-radius: 7px;
-    cursor: pointer;
-    font-size: 19px;
+    font-size: 1em;
     font-weight: bold;
-    transition: background 0.2s;
-    width: 100%;
-    max-width: 400px;
-    margin-top: 10px;
-    box-shadow: 0 2px 8px rgba(33,150,243,0.12);
-    user-select: none;
+    padding: 8px 18px;
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(33,150,243,0.10);
+    transition: background 0.2s, color 0.2s;
+    width: auto;
+    max-width: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
 }
 
-button:hover,
-button:focus {
+#syncButton:hover,
+#syncButton:focus,
+#external-links-button:hover,
+#external-links-button:focus {
     background: linear-gradient(90deg, #bbdefb 60%, #90caf9 100%);
     color: #0d47a1;
     outline: none;
@@ -330,6 +337,25 @@ button:focus {
         white-space: nowrap;
         user-select: none;
     }
+
+    .notification-sync-bar {
+        top: 8px;
+        right: 8px;
+        gap: 4px;
+        flex-wrap: nowrap;
+    }
+    .notification-icon {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+    }
+    #syncButton,
+    #external-links-button {
+        font-size: 0.92em;
+        padding: 6px 7px;
+        min-width: 0;
+    }
 }
 
 /* ===== ▼お知らせ機能スタイル ここから▼ ===== */
@@ -364,31 +390,8 @@ button:focus {
     20%, 40% { transform: rotate(15deg); }
 }
 
-/* データ同期ボタン */
-#syncButton {
-    background: linear-gradient(90deg, #e3f2fd 60%, #bbdefb 100%);
-    color: #1976d2;
-    border: 1.5px solid #90caf9;
-    border-radius: 7px;
-    font-size: 1em;
-    font-weight: bold;
-    padding: 8px 18px;
-    margin: 0;
-    box-shadow: 0 2px 8px rgba(33,150,243,0.10);
-    transition: background 0.2s, color 0.2s;
-    width: auto;
-    max-width: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    flex-shrink: 0;
-}
-#syncButton:hover, #syncButton:focus {
-    background: linear-gradient(90deg, #bbdefb 60%, #90caf9 100%);
-    color: #0d47a1;
-    outline: none;
-}
+/* データ同期ボタン（スタイルは上の共通ボタンで適用） */
+/* #syncButton の個別ルールは不要になりましたが残しても安全です */
 
 @media (max-width: 600px) {
     .notification-sync-bar {
