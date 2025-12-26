@@ -16,6 +16,10 @@
             <div class="notification-icon" id="notificationIcon">
                 <span class="notification-badge hidden" id="notificationBadge"></span>
             </div>
+
+            <!-- 外部リンクを開くボタン -->
+            <button id="external-links-button" title="外部リンクを表示">🔗 外部リンク</button>
+
             <button id="syncButton">🔄 データ同期</button>
         </div>
 
@@ -27,6 +31,39 @@
                 <button id="popupCloseButton">閉じる</button>
             </div>
         </div>
+
+        <!-- 外部リンク用ポップアップ -->
+        <div class="popup-wrapper hidden" id="links-popup" aria-hidden="true">
+            <div class="popup-overlay" id="links-popup-overlay"></div>
+            <div class="popup-content" role="dialog" aria-labelledby="links-popup-title">
+                <h2 id="links-popup-title">外部リンク</h2>
+                <div id="links-popup-list" style="margin-bottom:16px;">
+                    <p style="margin:0 0 8px 0;">便利な外部リソース：</p>
+
+                    <h3 style="margin:8px 0 4px 0;color:#bbdefb;font-size:1em;">sanbon氏制作ツール</h3>
+                    <ul style="padding-left:18px; margin:0 0 12px 0;">
+                        <li><a href="https://sanbon.me/jp/resources/awoken" target="_blank" rel="noopener noreferrer">覚醒スキル</a></li>
+                        <li><a href="https://sanbon.me/jp/resources/latent-awoken" target="_blank" rel="noopener noreferrer">潜在パズル</a></li>
+                        <li><a href="https://sanbon.me/jp/resources/badge" target="_blank" rel="noopener noreferrer">バッジ</a></li>
+                        <li><a href="https://sanbon.me/jp/resources/egg-simulator" target="_blank" rel="noopener noreferrer">ガチャシミュレーター</a></li>
+                        <li><a href="https://sanbon.me/jp/resources/probability-simulator" target="_blank" rel="noopener noreferrer">ガチャ確率計算機</a></li>
+                        <li><a href="https://sanbon.me/jp/resources/tier-maker" target="_blank" rel="noopener noreferrer">ティアメーカー</a></li>
+                        <li><a href="https://sanbon.me/jp/resources/puzzle" target="_blank" rel="noopener noreferrer">パズル練習</a></li>
+                    </ul>
+
+                    <h3 style="margin:8px 0 4px 0;color:#bbdefb;font-size:1em;">Twitter（旧X）</h3>
+                    <ul style="padding-left:18px; margin:0 0 12px 0;">
+                        <li><a href="https://x.com/pad_sexy" target="_blank" rel="noopener noreferrer">Twitter - ムラコ</a></li>
+                        <li><a href="https://x.com/DaikeYamamoto" target="_blank" rel="noopener noreferrer">Twitter - ダイケ</a></li>
+                        <li><a href="https://x.com/sarna_flanlily" target="_blank" rel="noopener noreferrer">Twitter - ツール制作者</a></li>
+                    </ul>
+
+                    <p style="margin:0;color:#bbdefb;font-size:0.9em;">リンクは新しいタブで開きます。</p>
+                </div>
+                <button id="links-popup-close-button">閉じる</button>
+            </div>
+        </div>
+
         <div class="container">
             <h1>PDC非対応計算ツール</h1>
 
