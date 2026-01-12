@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const adDoubleSelect = document.getElementById('adDouble');       // 広告視聴要素取得
     const badgeBonusSelect = document.getElementById('badgeBonus');     // バッジ効果要素取得
     const expValueDisplay = document.getElementById('expValue');
+    const expBreakdown = document.getElementById('expBreakdown');
 
     const tabs = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -243,6 +244,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             expValueDisplay.textContent = `獲得経験値: ${Math.round(result).toLocaleString()}`;
         }
+        // ブレークダウン表示を追加
+        try {
+            if (expBreakdown) {
+                const breakdown = `${baseExp.toLocaleString()} × ${leaderMulti} × ${friendMulti} × ${bonusMultiplier.toFixed(2)} × ${padPassBonus} × ${badgeBonus} × ${adDouble} = ${Math.round(result).toLocaleString()}`;
+                expBreakdown.textContent = breakdown;
+            }
+        } catch (e) {
+            if (expBreakdown) expBreakdown.textContent = '';
+        }
     }
 
 // ----------- HP計算処理 -----------
@@ -440,6 +450,9 @@ function runHpCalculations() {
             }
             calculateExp(); // ダンジョン変更時も計算実行
         });
+
+        // フロア選択変更時も計算実行（念のため、setupExpTab 前でも動くようにここにも登録）
+        expFloor.addEventListener('change', calculateExp);
 
         // 補助的な初期化関数（プレースホルダーのみ設定）
         function initializeSelect(selectElement, placeholderText) {
