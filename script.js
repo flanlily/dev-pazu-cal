@@ -1,5 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // モバイルでの長押しによるコンテキストメニュー（コピー等）を
+    // 入力要素以外では出さないようにする
+    document.addEventListener('contextmenu', (e) => {
+        try {
+            if (!e.target.closest || !e.target.closest('input, textarea, select')) {
+                e.preventDefault();
+            }
+        } catch (err) { /* ignore */ }
+    }, { passive: false });
+
     // ----------- HTML要素取得 -----------
     const dungeonSelect = document.getElementById('dungeonSelect');
     const floorSelect = document.getElementById('floorSelect');
@@ -23,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const tabs = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
+    // タブ選択で自動スクロールするかどうか（false にして自動スクロールを無効化）
+    const AUTO_SCROLL_ON_TAB = false;
 
     const notificationIcon = document.getElementById('notificationIcon');
     const notificationBadge = document.getElementById('notificationBadge');
@@ -92,8 +104,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (targetId === 'damage' && !damageTabInitialized) setupDamageTab();
                 if (targetId === 'exp' && !expTabInitialized) setupExpTab();
                 if (targetId === 'hp' && !hpTabInitialized) setupHpTab();
+                // 表示したコンテンツをスクロールして上部に揃える（固定ヘッダ分を考慮）
+                // 自動スクロールが不要なためデフォルトでは無効化しています
+                const showContent = document.getElementById(targetId);
+                if (showContent && AUTO_SCROLL_ON_TAB) scrollContentIntoView(showContent);
             });
         });
+    }
+
+    // 固定ヘッダ等を考慮して要素を上部にスクロールするヘルパー
+    function scrollContentIntoView(el) {
+        try {
+            const headerBar = document.querySelector('.notification-sync-bar');
+            const headerHeight = headerBar ? headerBar.getBoundingClientRect().height + 12 : 12;
+            const rect = el.getBoundingClientRect();
+            const absoluteTop = window.pageYOffset + rect.top - headerHeight;
+            window.scrollTo({ top: absoluteTop, behavior: 'smooth' });
+        } catch (e) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     // ----------- 各タブの初期化 -----------
@@ -242,7 +271,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof result !== 'number' || isNaN(result) || !isFinite(result)) {
             expValueDisplay.textContent = '-';
         } else {
-            expValueDisplay.textContent = `獲得経験値: ${Math.round(result).toLocaleString()}`;
+            // 数字のみを表示（プレフィックスや説明文なし）
+            expValueDisplay.textContent = `${Math.round(result).toLocaleString()}`;
         }
         // ブレークダウン表示を追加
         try {
@@ -487,6 +517,8 @@ function runHpCalculations() {
             if (targetId === 'damage' && !damageTabInitialized) setupDamageTab();
             if (targetId === 'exp' && !expTabInitialized) setupExpTab();
             if (targetId === 'hp' && !hpTabInitialized) setupHpTab();
+            // 初期表示時にもスクロール位置を調整（必要なら有効化する）
+            if (showContent && AUTO_SCROLL_ON_TAB) scrollContentIntoView(showContent);
         }
         localStorage.removeItem('lastActiveTab'); // 復元後は削除
 
