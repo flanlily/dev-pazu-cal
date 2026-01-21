@@ -81,14 +81,17 @@ body {
     justify-content: center;
     padding: 12px; /* 画面端での余白確保 */
 
-    /* 背景画像の表示をスマホ画面に合わせるための指定 */
+    /* 背景画像: 常に画面全体をカバーする設定 */
     background-repeat: no-repeat;
     background-size: cover;         /* 画像を縦横比を保って画面全体に表示 */
     -webkit-background-size: cover; /* 古い iOS 対応 */
-    background-position: center top;/* 必要に応じ center center に変更可能 */
-    background-attachment: scroll;  /* mobile で fixed は不安定なため scroll を推奨 */
+    background-position: center center; /* 中央を基準に表示 */
+    /* 固定にするとスクロール時に背景が動かない（見切れ対策に有効）。不要なら 'scroll' に戻す */
+    background-attachment: fixed;
 
-    /* 背景画像のスタイルをJS側で設定するため、こちらからは削除 */
+     /* 背景画像のスタイルをJS側で設定するため、こちらからは削除
+         フォールバック色は黒にして、画像未読込時に青い帯が出ないようにする */
+     background-color: #000; /* 画像が無い/小さい場合のフォールバック */
 }
 /* ▲▲▲【ここまで修正箇所】▲▲▲ */
 
