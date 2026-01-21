@@ -117,6 +117,25 @@ body {
          フォールバック色は黒にして、画像未読込時に青い帯が出ないようにする */
      background-color: #000; /* 画像が無い/小さい場合のフォールバック */
 }
+
+/* ----- モバイルでの長押し選択やハイライトを抑制 (入力欄は除外) ----- */
+/* 非入力要素のテキスト選択を無効にすることで長押しメニューや選択ハンドルを消す */
+*:not(input):not(textarea):not(select) {
+    -webkit-user-select: none; /* iOS/Safari */
+    -webkit-touch-callout: none; /* iOS長押しメニュー */
+    user-select: none;
+}
+
+/* ボタンやリンクは通常通り操作できるようにする */
+button, a {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* タブやコンテナのスクロール補正のため、タッチアクションは自動 */
+.tabs, .tab-content {
+    touch-action: auto;
+}
 /* ▲▲▲【ここまで修正箇所】▲▲▲ */
 
 .container {
