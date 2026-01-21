@@ -100,10 +100,8 @@ body {
     background-color: #1565c0;
     color: #fff;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px; /* 画面端での余白確保 */
+    display: block;
+    padding: 12px 12px 40px 12px; /* 上寄せにして下に余白を確保 */
 
     /* 背景画像: 常に画面全体をカバーする設定 */
     background-repeat: no-repeat;
@@ -116,6 +114,12 @@ body {
      /* 背景画像のスタイルをJS側で設定するため、こちらからは削除
          フォールバック色は黒にして、画像未読込時に青い帯が出ないようにする */
      background-color: #000; /* 画像が無い/小さい場合のフォールバック */
+    
+}
+
+/* コンテナを少しだけ上に寄せる（モバイルでタブ切替時に上部が表示されやすくする） */
+.container {
+    margin-top: 18px;
 }
 
 /* ----- モバイルでの長押し選択やハイライトを抑制 (入力欄は除外) ----- */
